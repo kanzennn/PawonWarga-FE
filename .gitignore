@@ -43,4 +43,7 @@ next-env.d.ts
 # IDE
 .idea/
 .claude/
+
+# Claude Code project instructions (kept locally, not published)
 CLAUDE.md
+AGENTS.md

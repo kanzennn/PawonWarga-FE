@@ -11,19 +11,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace("/login");
-    }
-  }, [isLoading, user, router]);
+  // useEffect(() => {
+  //   if (!isLoading && !user) {
+  //     router.replace("/login");
+  //   }
+  // }, [isLoading, user, router]);
 
-  if (isLoading || !user) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-[#f6faf5] text-sm font-bold text-[#6d7e75]">
-        Loading...
-      </div>
-    );
-  }
+  // if (isLoading || !user) {
+  //   return (
+  //     <div className="grid min-h-screen place-items-center bg-[#f6faf5] text-sm font-bold text-[#6d7e75]">
+  //       Loading...
+  //     </div>
+  //   );
+  // }
 
   return (
     <MentionProvider>

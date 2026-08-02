@@ -1,13 +1,20 @@
 import type {
   CategorySentiment,
+  DataSourceStatus,
   Keyword,
   LocationSentiment,
   Mention,
+  MetricValue,
+  MonitoringPreference,
   PlatformDatum,
   ReportListItem,
   SentimentDistributionSlice,
+  SentimentDriver,
   SentimentTrendPoint,
   SettingsIntegration,
+  TopicSlice,
+  TrendInsight,
+  WordCloudWord,
 } from "@/lib/types";
 
 export const sentimentTrend: SentimentTrendPoint[] = [
@@ -154,3 +161,146 @@ export const settingsIntegrations: SettingsIntegration[] = [
   { name: "YouTube", status: "Operational", count: "11.0K mentions" },
   { name: "News API", status: "Operational", count: "18.7K articles" },
 ];
+
+export const monitoringPreferences: MonitoringPreference[] = [
+  {
+    key: "negativeAlert",
+    title: "Negative sentiment alert",
+    desc: "Notify when negative sentiment rises above threshold.",
+    checked: true,
+  },
+  {
+    key: "dailySummary",
+    title: "Daily AI summary",
+    desc: "Receive daily summary of MBG public conversations.",
+    checked: true,
+  },
+  {
+    key: "keywordSpike",
+    title: "Keyword spike detection",
+    desc: "Detect sudden increase in monitored keywords.",
+    checked: true,
+  },
+  {
+    key: "weeklyReport",
+    title: "Weekly report email",
+    desc: "Send scheduled sentiment report every Monday.",
+    checked: false,
+  },
+];
+
+export const dashboardHeadline = {
+  positiveShare: "72.4%",
+  totalConversations: "128,430",
+  description: "Based on 128,430 public conversations about the MBG program.",
+};
+
+export const dashboardSummary: Record<
+  "totalMentions" | "positive" | "negative" | "neutral",
+  MetricValue
+> = {
+  totalMentions: { value: "128,430", change: "▲ 18.2%" },
+  positive: { value: "72.4%", change: "▲ 6.8%" },
+  negative: { value: "18.7%", change: "▼ 3.2%" },
+  neutral: { value: "8.9%", change: "▲ 1.1%" },
+};
+
+export const topicDistribution: TopicSlice[] = [
+  { name: "Food Quality", value: 28, color: "#064e3b" },
+  { name: "School Distribution", value: 22, color: "#3fa76d" },
+  { name: "Nutrition", value: 18, color: "#91dc68" },
+  { name: "Government Policy", value: 14, color: "#d8bf62" },
+  { name: "Budget Transparency", value: 10, color: "#f3b21b" },
+  { name: "Public Complaints", value: 8, color: "#0f2336" },
+];
+
+export const dashboardKeywordCloud: WordCloudWord[] = [
+  { text: "makan bergizi", value: 64 },
+  { text: "sekolah", value: 52 },
+  { text: "gizi anak", value: 38 },
+  { text: "distribusi", value: 34 },
+  { text: "kualitas makanan", value: 31 },
+  { text: "anggaran", value: 28 },
+  { text: "pemerintah", value: 22 },
+  { text: "siswa", value: 21 },
+  { text: "menu sekolah", value: 19 },
+  { text: "transparansi", value: 17 },
+  { text: "keterlambatan", value: 16 },
+  { text: "evaluasi", value: 14 },
+  { text: "pengawasan", value: 13 },
+  { text: "nutrisi", value: 12 },
+];
+
+export const sentimentDrivers: SentimentDriver[] = [
+  { name: "Manfaat gizi anak", value: "42.1K", tone: "positive", label: "Positive", progress: 92 },
+  { name: "Distribusi MBG", value: "31.8K", tone: "negative", label: "Negative", progress: 78 },
+  { name: "Kualitas makanan", value: "24.7K", tone: "negative", label: "Negative", progress: 66 },
+  { name: "Dukungan sekolah", value: "18.3K", tone: "positive", label: "Positive", progress: 52 },
+  { name: "Evaluasi anggaran", value: "15.6K", tone: "neutral", label: "Neutral", progress: 42 },
+];
+
+export const dashboardDataSources: DataSourceStatus[] = [
+  { code: "X", label: "X / Twitter", value: "45.2K", active: true },
+  { code: "IG", label: "Instagram", value: "32.1K", active: true },
+  { code: "TT", label: "TikTok", value: "21.4K", active: true },
+];
+
+export const dashboardLastUpdated = "15 menit yang lalu";
+
+export const sentimentScore = {
+  score: 81,
+  scoreMax: 100,
+  description:
+    "Public sentiment remains healthy with positive conversations leading across most monitored platforms.",
+};
+
+export const sentimentSummary: Record<
+  "positive" | "negative" | "neutral" | "analyzed",
+  MetricValue
+> = {
+  positive: { value: "72.4%", change: "▲ 6.8%" },
+  negative: { value: "18.7%", change: "▼ 3.2%" },
+  neutral: { value: "8.9%", change: "▲ 1.1%" },
+  analyzed: { value: "128K", change: "▲ 18.2%" },
+};
+
+export const sentimentTrendInsights: TrendInsight[] = [
+  {
+    label: "Peak positive",
+    value: "82%",
+    desc: "Highest positive sentiment this month",
+    tone: "positive",
+  },
+  {
+    label: "Lowest negative",
+    value: "12%",
+    desc: "Negative discussion decreased",
+    tone: "neutral",
+  },
+  {
+    label: "Trend status",
+    value: "Stable",
+    desc: "Overall sentiment is under control",
+    tone: "info",
+  },
+];
+
+export const sentimentCategoryNote =
+  "Positive sentiment is strongest in nutrition and school access categories, while negative sentiment mostly appears in quality and distribution discussions.";
+
+export const aiInsightStats: Record<
+  "generatedInsights" | "detectedIssues" | "resolvedSignals",
+  MetricValue
+> = {
+  generatedInsights: { value: "48", change: "▲ 12" },
+  detectedIssues: { value: "7", change: "▲ 3" },
+  resolvedSignals: { value: "21", change: "▲ 8" },
+};
+
+export const aiScoreNote =
+  "Skor gabungan dari sentimen, reach, issue velocity, dan stabilitas percakapan.";
+
+export const reportEngagementStats: Record<"downloads" | "shared", MetricValue> = {
+  downloads: { value: "1.2K", change: "▲ 19%" },
+  shared: { value: "186", change: "▲ 12%" },
+};

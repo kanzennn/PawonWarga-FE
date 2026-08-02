@@ -5,7 +5,7 @@ import {
   platformData,
   sentimentDistribution,
 } from "@/lib/data/dummy-data";
-import type { Keyword, Mention, PlatformDatum, Sentiment } from "@/lib/types";
+import type { Keyword, Mention, PlatformDatum, ReportListItem, Sentiment } from "@/lib/types";
 
 export interface PlatformMeta {
   label: string;
@@ -300,7 +300,9 @@ export interface ReportPreview {
   id: string;
   title: string;
   type: string;
-  status: "Draft";
+  // Widened from "Draft" so a document fetched back from GET /reports/{id}
+  // (which can already be Ready or Scheduled) fits the same shape.
+  status: ReportListItem["status"];
   date: string;
   pages: number;
   format: string;

@@ -20,7 +20,7 @@ interface WordCloudProps {
 export default function WordCloud({ words = [] }: WordCloudProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [layoutWords, setLayoutWords] = useState<LayoutWord[]>([]);
-  const [size, setSize] = useState({ width: 320, height: 260 });
+  const [size, setSize] = useState({ width: 300, height: 240 });
 
   const normalizedWords = useMemo<LayoutWord[]>(() => {
     const values = words.map((word) => word.value);
@@ -33,7 +33,7 @@ export default function WordCloud({ words = [] }: WordCloudProps) {
       return {
         text: word.text,
         value: word.value,
-        size: 14 + ratio * 30,
+        size: 13 + ratio * 29,
         color: WORD_COLORS[index % WORD_COLORS.length],
       };
     });
@@ -62,7 +62,7 @@ export default function WordCloud({ words = [] }: WordCloudProps) {
     cloud<LayoutWord>()
       .size([size.width, size.height])
       .words(normalizedWords)
-      .padding(5)
+      .padding(4)
       .rotate(() => 0)
       .font("Inter, system-ui, sans-serif")
       .fontWeight(() => 900)
@@ -75,7 +75,7 @@ export default function WordCloud({ words = [] }: WordCloudProps) {
   }, [normalizedWords, size]);
 
   return (
-    <div ref={wrapperRef} className="h-[260px] w-full overflow-hidden">
+    <div ref={wrapperRef} className="h-[240px] w-full overflow-hidden">
       <svg
         width="100%"
         height="100%"

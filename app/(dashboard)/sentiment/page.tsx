@@ -25,18 +25,12 @@ import {
 
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
-import {
-  categorySentiment,
-  platformData,
-  sentimentDistribution,
-  sentimentTrend,
-} from "@/lib/data/dummy-data";
+import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useSentimentOverview } from "@/hooks/use-sentiment";
+import type { SentimentOverview } from "@/lib/api/types";
 
 export default function SentimentAnalysisPage() {
-  const totalSentiment = sentimentDistribution.reduce(
-    (total, item) => total + item.value,
-    0,
-  );
+  const { data, isLoading, error, refetch } = useSentimentOverview();
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">
@@ -45,6 +39,35 @@ export default function SentimentAnalysisPage() {
         subtitle="Analisis detail sentimen positif, negatif, dan netral terhadap program MBG."
       />
 
+      {isLoading ? (
+        <LoadingState message="Memuat analisis sentimen..." />
+      ) : !data ? (
+        <ErrorState message={error ?? "Data sentimen tidak tersedia."} onRetry={refetch} />
+      ) : (
+        <SentimentContent overview={data} />
+      )}
+    </div>
+  );
+}
+
+function SentimentContent({ overview }: { overview: SentimentOverview }) {
+  const {
+    score,
+    scoreMax,
+    description,
+    summary,
+    distribution,
+    trend,
+    trendInsights,
+    byPlatform,
+    byCategory,
+    categoryNote,
+  } = overview;
+
+  const totalSentiment = distribution.reduce((total, item) => total + item.value, 0);
+
+  return (
+    <>
       <section className="mb-5 grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_repeat(4,minmax(170px,1fr))]">
         <div className="relative overflow-hidden rounded-[22px] border border-[#dce8df] bg-[radial-gradient(circle_at_90%_20%,rgba(185,251,125,0.28),transparent_30%),linear-gradient(135deg,#04392b,#05281f)] p-6 text-white shadow-[0_18px_50px_rgba(11,68,45,0.08)] xl:min-h-[180px]">
           <div className="relative z-10 flex items-center justify-between gap-4">
@@ -53,7 +76,7 @@ export default function SentimentAnalysisPage() {
                 Overall Sentiment Score
               </p>
               <h2 className="m-0 mt-3 text-[46px] font-black leading-none tracking-[-2px] text-[#b9fb7d]">
-                81/100
+                {score}/{scoreMax}
               </h2>
             </div>
 
@@ -63,33 +86,32 @@ export default function SentimentAnalysisPage() {
           </div>
 
           <p className="relative z-10 mt-4 max-w-sm text-sm font-medium leading-6 text-white/85">
-            Public sentiment remains healthy with positive conversations leading
-            across most monitored platforms.
+            {description}
           </p>
 
           <div className="absolute -bottom-20 -right-16 h-[220px] w-[220px] rounded-full border border-[#beff96]/20 before:absolute before:inset-8 before:rounded-full before:border before:border-[#beff96]/20 after:absolute after:inset-16 after:rounded-full after:border after:border-[#beff96]/20" />
         </div>
 
-        <StatCard icon={Smile} label="Positive" value="72.4%" change="▲ 6.8%" />
+        <StatCard icon={Smile} label="Positive" value={summary.positive.value} change={summary.positive.change} />
         <StatCard
           icon={Frown}
           label="Negative"
-          value="18.7%"
-          change="▼ 3.2%"
+          value={summary.negative.value}
+          change={summary.negative.change}
           tone="danger"
         />
         <StatCard
           icon={Meh}
           label="Neutral"
-          value="8.9%"
-          change="▲ 1.1%"
+          value={summary.neutral.value}
+          change={summary.neutral.change}
           tone="neutral"
         />
         <StatCard
           icon={MessageCircle}
           label="Analyzed Mentions"
-          value="128K"
-          change="▲ 18.2%"
+          value={summary.analyzed.value}
+          change={summary.analyzed.change}
           tone="info"
         />
       </section>
@@ -100,13 +122,13 @@ export default function SentimentAnalysisPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={sentimentDistribution}
+                  data={distribution}
                   dataKey="value"
                   innerRadius={62}
                   outerRadius={102}
                   paddingAngle={3}
                 >
-                  {sentimentDistribution.map((item) => (
+                  {distribution.map((item) => (
                     <Cell
                       key={item.name}
                       fill={item.color}
@@ -121,7 +143,7 @@ export default function SentimentAnalysisPage() {
 
             <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">
               <b className="text-[26px] font-black leading-none text-[#10231c]">
-                81/100
+                {score}/{scoreMax}
               </b>
               <span className="mt-1 text-xs font-bold text-[#6d7e75]">
                 Score
@@ -130,7 +152,7 @@ export default function SentimentAnalysisPage() {
           </div>
 
           <div className="mt-4 grid gap-7">
-            {sentimentDistribution.map((item) => {
+            {distribution.map((item) => {
               const width = totalSentiment
                 ? Math.round((item.value / totalSentiment) * 100)
                 : 0;
@@ -187,7 +209,7 @@ export default function SentimentAnalysisPage() {
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={sentimentTrend}
+                data={trend}
                 margin={{ top: 8, right: 16, left: -8, bottom: 0 }}
               >
                 <CartesianGrid stroke="#e6e9e5" vertical={false} />
@@ -243,26 +265,15 @@ export default function SentimentAnalysisPage() {
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-3">
-            <MiniInsight
-              label="Peak positive"
-              value="82%"
-              desc="Highest positive sentiment this month"
-              tone="positive"
-            />
-
-            <MiniInsight
-              label="Lowest negative"
-              value="12%"
-              desc="Negative discussion decreased"
-              tone="neutral"
-            />
-
-            <MiniInsight
-              label="Trend status"
-              value="Stable"
-              desc="Overall sentiment is under control"
-              tone="info"
-            />
+            {trendInsights.map((item) => (
+              <MiniInsight
+                key={item.label}
+                label={item.label}
+                value={item.value}
+                desc={item.desc}
+                tone={item.tone}
+              />
+            ))}
           </div>
         </Card>
       </section>
@@ -276,7 +287,7 @@ export default function SentimentAnalysisPage() {
           </div>
 
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={platformData} margin={{ top: 8, right: 10 }}>
+            <BarChart data={byPlatform} margin={{ top: 8, right: 10 }}>
               <CartesianGrid stroke="#e6e9e5" vertical={false} />
               <XAxis
                 dataKey="name"
@@ -306,15 +317,13 @@ export default function SentimentAnalysisPage() {
         <Card title="Sentiment by Category" className="p-7">
           <div className="mb-5 rounded-2xl border border-[#dce8df] bg-[#f8fbf5] p-4">
             <p className="m-0 text-sm font-bold leading-6 text-[#6d7e75]">
-              Positive sentiment is strongest in nutrition and school access
-              categories, while negative sentiment mostly appears in quality and
-              distribution discussions.
+              {categoryNote}
             </p>
           </div>
 
           <ResponsiveContainer width="100%" height={320}>
             <BarChart
-              data={categorySentiment}
+              data={byCategory}
               layout="vertical"
               margin={{ left: 24, right: 12 }}
             >
@@ -337,7 +346,7 @@ export default function SentimentAnalysisPage() {
           </ResponsiveContainer>
         </Card>
       </section>
-    </div>
+    </>
   );
 }
 

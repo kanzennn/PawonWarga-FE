@@ -1,48 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Filter, MessageCircle, Radio, Search, UsersRound } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
+import { ErrorState, LoadingState } from "@/components/ui/DataState";
 import { useMention } from "@/context/mention-context";
-import { mentions, platformData } from "@/lib/data/dummy-data";
-import {
-  aggregatePlatformVolume,
-  filterMentions,
-  formatCompact,
-  platformMeta,
-  summarizeMentions,
-  type MentionFilters,
-} from "@/lib/business-logic";
+import { useMentions } from "@/hooks/use-mentions";
+import { formatCompact, platformMeta } from "@/lib/business-logic";
+import type { MentionListResult, MentionQuery } from "@/lib/api/types";
+
+type MonitoringFilters = Required<Pick<MentionQuery, "query" | "platform" | "sentiment">>;
+
+const INITIAL_FILTERS: MonitoringFilters = {
+  query: "",
+  platform: "All Platforms",
+  sentiment: "All Sentiments",
+};
 
 export default function SocialMonitoringPage() {
-  const { selectMention } = useMention();
-  const [draftFilters, setDraftFilters] = useState<MentionFilters>({
-    query: "",
-    platform: "All Platforms",
-    sentiment: "All Sentiments",
-  });
-  const [filters, setFilters] = useState<MentionFilters>(draftFilters);
+  const [draftFilters, setDraftFilters] = useState<MonitoringFilters>(INITIAL_FILTERS);
+  const [filters, setFilters] = useState<MonitoringFilters>(INITIAL_FILTERS);
 
-  const filteredMentions = useMemo(
-    () => filterMentions(mentions, filters),
-    [filters],
-  );
-  const metrics = useMemo(
-    () => summarizeMentions(filteredMentions),
-    [filteredMentions],
-  );
-  const platformVolume = useMemo(
-    () => aggregatePlatformVolume(filteredMentions),
-    [filteredMentions],
-  );
-  const totalPlatformValue = platformVolume.reduce(
-    (total, item) => total + item.value,
-    0,
-  );
+  const { data, isLoading, error, refetch } = useMentions(filters);
 
-  const updateDraftFilter = (key: keyof MentionFilters, value: string) => {
+  const updateDraftFilter = (key: keyof MonitoringFilters, value: string) => {
     setDraftFilters((currentFilters) => ({
       ...currentFilters,
       [key]: value,
@@ -61,6 +44,45 @@ export default function SocialMonitoringPage() {
         subtitle="Pantau percakapan publik tentang MBG secara real-time dari berbagai platform."
       />
 
+      {isLoading ? (
+        <LoadingState message="Memuat percakapan publik..." />
+      ) : !data ? (
+        <ErrorState message={error ?? "Data mention tidak tersedia."} onRetry={refetch} />
+      ) : (
+        <MonitoringContent
+          data={data}
+          draftFilters={draftFilters}
+          onDraftChange={updateDraftFilter}
+          onApply={applyFilters}
+        />
+      )}
+    </div>
+  );
+}
+
+interface MonitoringContentProps {
+  data: MentionListResult;
+  draftFilters: MonitoringFilters;
+  onDraftChange: (key: keyof MonitoringFilters, value: string) => void;
+  onApply: (event: React.FormEvent) => void;
+}
+
+function MonitoringContent({
+  data,
+  draftFilters,
+  onDraftChange,
+  onApply,
+}: MonitoringContentProps) {
+  const { selectMention } = useMention();
+  const { items: filteredMentions, metrics, platformVolume, platforms, totalUnfiltered } = data;
+
+  const totalPlatformValue = platformVolume.reduce(
+    (total, item) => total + item.value,
+    0,
+  );
+
+  return (
+    <>
       <div className="mb-5 grid gap-4 xl:grid-cols-4">
         <StatCard
           icon={Radio}
@@ -93,34 +115,32 @@ export default function SocialMonitoringPage() {
       <Card className="mb-5 p-5">
         <form
           className="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px_150px]"
-          onSubmit={applyFilters}
+          onSubmit={onApply}
         >
           <label className="flex h-12 items-center gap-3 rounded-2xl border border-[#dce8df] bg-white px-4 text-[#6d7e75]">
             <Search size={18} />
             <input
               value={draftFilters.query}
-              onChange={(event) => updateDraftFilter("query", event.target.value)}
+              onChange={(event) => onDraftChange("query", event.target.value)}
               className="w-full border-0 bg-transparent text-[#10231c] outline-none"
               placeholder="Search MBG mentions..."
             />
           </label>
           <select
             value={draftFilters.platform}
-            onChange={(event) => updateDraftFilter("platform", event.target.value)}
+            onChange={(event) => onDraftChange("platform", event.target.value)}
             className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
           >
             <option value="All Platforms">All Platforms</option>
-            {platformData.map((item) => (
-              <option key={item.name} value={item.name}>
-                {item.name}
+            {platforms.map((name) => (
+              <option key={name} value={name}>
+                {name}
               </option>
             ))}
           </select>
           <select
             value={draftFilters.sentiment}
-            onChange={(event) =>
-              updateDraftFilter("sentiment", event.target.value)
-            }
+            onChange={(event) => onDraftChange("sentiment", event.target.value)}
             className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
           >
             <option value="All Sentiments">All Sentiments</option>
@@ -146,7 +166,7 @@ export default function SocialMonitoringPage() {
                   Real-time public conversations
                 </p>
                 <p className="m-0 mt-1 text-xs font-bold text-[#6d7e75]">
-                  Showing {filteredMentions.length} of {mentions.length} dummy
+                  Showing {filteredMentions.length} of {totalUnfiltered} dummy
                   conversations
                 </p>
               </div>
@@ -332,7 +352,7 @@ export default function SocialMonitoringPage() {
           </div>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
 

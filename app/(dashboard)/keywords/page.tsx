@@ -7,39 +7,26 @@ import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
-import { keywords } from "@/lib/data/dummy-data";
-import {
-  buildKeywordAlerts,
-  filterKeywords,
-  formatCompact,
-  keywordStats,
-  type KeywordFilters,
-} from "@/lib/business-logic";
+import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useKeywords } from "@/hooks/use-keywords";
+import { formatCompact } from "@/lib/business-logic";
+import type { KeywordListResult, KeywordQuery } from "@/lib/api/types";
 
 export default function KeywordSentimentPage() {
-  const [filters, setFilters] = useState<KeywordFilters>({
+  const [filters, setFilters] = useState<Required<KeywordQuery>>({
     query: "",
     sentiment: "All Sentiments",
   });
 
-  const filteredKeywords = useMemo(
-    () => filterKeywords(keywords, filters),
-    [filters],
-  );
-  const stats = useMemo(() => keywordStats(filteredKeywords), [filteredKeywords]);
-  const chartKeywords = useMemo(
-    () =>
-      filteredKeywords
-        .slice(0, 8)
-        .map((item) => ({ name: item.text, value: item.value })),
-    [filteredKeywords],
-  );
-  const alerts = useMemo(
-    () => buildKeywordAlerts(filteredKeywords),
-    [filteredKeywords],
-  );
+  // The input stays bound to `filters.query`, only the request is debounced.
+  const debouncedQuery = useDebouncedValue(filters.query);
+  const { data, isLoading, error, refetch } = useKeywords({
+    query: debouncedQuery,
+    sentiment: filters.sentiment,
+  });
 
-  const updateFilter = (key: keyof KeywordFilters, value: string) => {
+  const updateFilter = (key: keyof KeywordQuery, value: string) => {
     setFilters((currentFilters) => ({
       ...currentFilters,
       [key]: value,
@@ -50,6 +37,33 @@ export default function KeywordSentimentPage() {
     <div className="min-w-0 pb-24 lg:pb-0">
       <PageHeading title="Keyword Sentiment" subtitle="Lihat kata kunci yang paling memengaruhi sentimen publik tentang MBG." />
 
+      {isLoading ? (
+        <LoadingState message="Memuat keyword..." />
+      ) : !data ? (
+        <ErrorState message={error ?? "Data keyword tidak tersedia."} onRetry={refetch} />
+      ) : (
+        <KeywordContent data={data} filters={filters} onFilterChange={updateFilter} />
+      )}
+    </div>
+  );
+}
+
+interface KeywordContentProps {
+  data: KeywordListResult;
+  filters: Required<KeywordQuery>;
+  onFilterChange: (key: keyof KeywordQuery, value: string) => void;
+}
+
+function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) {
+  const { items, stats, alerts } = data;
+
+  const chartKeywords = useMemo(
+    () => items.slice(0, 8).map((item) => ({ name: item.text, value: item.value })),
+    [items],
+  );
+
+  return (
+    <>
       <div className="mb-5 grid gap-4 xl:grid-cols-4">
         <StatCard icon={Hash} label="Tracked Keywords" value={String(stats.tracked)} change="Filtered" />
         <StatCard icon={TrendingUp} label="Rising Keywords" value={String(stats.rising)} change="Growth >= 12%" tone="info" />
@@ -63,14 +77,14 @@ export default function KeywordSentimentPage() {
             <Search size={18} />
             <input
               value={filters.query}
-              onChange={(event) => updateFilter("query", event.target.value)}
+              onChange={(event) => onFilterChange("query", event.target.value)}
               className="w-full border-0 bg-transparent text-[#10231c] outline-none"
               placeholder="Search keyword..."
             />
           </label>
           <select
             value={filters.sentiment}
-            onChange={(event) => updateFilter("sentiment", event.target.value)}
+            onChange={(event) => onFilterChange("sentiment", event.target.value)}
             className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
           >
             <option value="All Sentiments">All Sentiments</option>
@@ -83,8 +97,8 @@ export default function KeywordSentimentPage() {
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <Card title="Keyword Cloud" className="p-7">
-          {filteredKeywords.length ? (
-            <WordCloud words={filteredKeywords} />
+          {items.length ? (
+            <WordCloud words={items} />
           ) : (
             <EmptyState message="Tidak ada keyword yang cocok dengan filter." />
           )}
@@ -92,7 +106,7 @@ export default function KeywordSentimentPage() {
 
         <Card title="Keyword Ranking" className="p-7">
           <div className="grid gap-4">
-            {filteredKeywords.slice(0, 7).map((item, index) => (
+            {items.slice(0, 7).map((item, index) => (
               <div key={item.text} className="grid grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 border-b border-[#dce8df] pb-3 last:border-0 last:pb-0">
                 <span className="grid h-7 w-7 place-items-center rounded-full bg-[#eef7ea] text-sm font-black text-[#07513b]">{index + 1}</span>
                 <div className="min-w-0">
@@ -102,7 +116,7 @@ export default function KeywordSentimentPage() {
                 <Badge tone={item.sentiment}>{item.sentiment}</Badge>
               </div>
             ))}
-            {!filteredKeywords.length && (
+            {!items.length && (
               <EmptyState message="Ranking kosong untuk kombinasi filter ini." />
             )}
           </div>
@@ -140,7 +154,7 @@ export default function KeywordSentimentPage() {
           </div>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -28,7 +28,7 @@ const menus: MenuItem[] = [
   { href: "/monitoring", label: "Social Monitoring", icon: MessageSquareText },
   { href: "/sentiment", label: "Sentiment Analysis", icon: Smile },
   { href: "/keywords", label: "Keyword Sentiment", icon: Search },
-  { href: "/ai", label: "AI Summary", icon: Bot },
+  // { href: "/ai", label: "AI Summary", icon: Bot },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
@@ -38,14 +38,19 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
+export default function Sidebar({
+  isCollapsed,
+  onToggleCollapse,
+}: SidebarProps) {
   const pathname = usePathname();
 
   return (
     <aside
       className={[
         "fixed inset-x-0 bottom-0 z-40 flex h-[72px] items-center gap-2 overflow-x-auto bg-[#0d321e] px-3 text-white lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:items-stretch lg:overflow-hidden lg:bg-[radial-gradient(circle_at_72%_34%,rgba(151,221,85,0.24),transparent_30%),linear-gradient(180deg,#0d321e,#102c1a_68%,#092014)] lg:transition-all lg:duration-300",
-        isCollapsed ? "lg:w-[88px] lg:px-3.5 lg:py-5" : "lg:w-[300px] lg:px-4 lg:py-6",
+        isCollapsed
+          ? "lg:w-[88px] lg:px-3.5 lg:py-5"
+          : "lg:w-[300px] lg:px-4 lg:py-6",
       ].join(" ")}
     >
       <div
@@ -56,7 +61,12 @@ export default function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps)
             : "mb-9 items-center justify-between gap-4",
         ].join(" ")}
       >
-        <div className={['flex items-center gap-3.5 min-w-0', isCollapsed ? 'justify-center' : ''].join(' ')}>
+        <div
+          className={[
+            "flex items-center gap-3.5 min-w-0",
+            isCollapsed ? "justify-center" : "",
+          ].join(" ")}
+        >
           <LogoMark />
 
           {!isCollapsed && (

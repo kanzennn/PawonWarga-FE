@@ -49,19 +49,19 @@ export default function StatCard({
   const style = toneClasses[tone] || toneClasses.positive;
 
   return (
-    <div className="rounded-[22px] border border-[#dce8df] bg-white/90 p-5 shadow-[0_18px_50px_rgba(11,68,45,0.08)]">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <div className="rounded-[18px] border border-[#dce8df] bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,68,45,0.06)]">
+      <div className="mb-3 flex items-start justify-between gap-4">
         <div
           className={[
-            "grid h-[42px] w-[42px] shrink-0 place-items-center rounded-[14px]",
+            "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
             style.icon,
           ].join(" ")}
         >
-          <Icon size={21} />
+          <Icon size={20} />
         </div>
 
         <svg
-          className={["mt-1 w-[78px] opacity-95", style.line].join(" ")}
+          className={["mt-1 w-[72px] opacity-95", style.line].join(" ")}
           viewBox="0 0 120 36"
         >
           <polyline
@@ -73,15 +73,15 @@ export default function StatCard({
         </svg>
       </div>
 
-      <p className="m-0 mb-1 text-sm font-bold text-[#6d7e75]">{label}</p>
+      <p className="m-0 mb-1 text-[13px] font-bold text-[#6d7e75]">{label}</p>
 
-      <h3 className="m-0 text-[28px] font-black leading-tight tracking-[-0.5px] text-[#10231c]">
+      <h3 className="m-0 text-[26px] font-black leading-tight text-[#10231c]">
         {value}
       </h3>
 
       <span
         className={[
-          "mt-3 inline-flex h-6 items-center rounded-full px-2.5 text-xs font-black",
+          "mt-2.5 inline-flex h-6 items-center rounded-full px-2.5 text-xs font-black",
           style.change,
         ].join(" ")}
       >

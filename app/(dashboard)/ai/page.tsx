@@ -1,20 +1,38 @@
+"use client";
+
 import { Bot, CheckCircle2, FileText, Lightbulb, ShieldAlert, Sparkles } from "lucide-react";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
-import { generateExecutiveInsight } from "@/lib/business-logic";
+import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useAiInsight } from "@/hooks/use-ai-insight";
+import type { AiInsight } from "@/lib/api/types";
 
 export default function AISummaryPage() {
-  const insight = generateExecutiveInsight();
+  const { data: insight, isLoading, error, refetch } = useAiInsight();
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">
       <PageHeading title="AI Summary" subtitle="Ringkasan otomatis, temuan utama, isu prioritas, dan rekomendasi komunikasi publik." />
 
+      {isLoading ? (
+        <LoadingState message="Memuat ringkasan AI..." />
+      ) : !insight ? (
+        <ErrorState message={error ?? "Ringkasan AI tidak tersedia."} onRetry={refetch} />
+      ) : (
+        <AiSummaryContent insight={insight} />
+      )}
+    </div>
+  );
+}
+
+function AiSummaryContent({ insight }: { insight: AiInsight }) {
+  return (
+    <>
       <div className="mb-5 grid gap-4 xl:grid-cols-4">
-        <StatCard icon={Bot} label="AI Confidence" value={`${insight.confidence}%`} change="Stable" />
-        <StatCard icon={Sparkles} label="Generated Insights" value="48" change="▲ 12" tone="info" />
-        <StatCard icon={ShieldAlert} label="Detected Issues" value="7" change="▲ 3" tone="danger" />
-        <StatCard icon={CheckCircle2} label="Resolved Signals" value="21" change="▲ 8" />
+        <StatCard icon={Bot} label="AI Confidence" value={insight.stats.confidence.value} change={insight.stats.confidence.change} />
+        <StatCard icon={Sparkles} label="Generated Insights" value={insight.stats.generatedInsights.value} change={insight.stats.generatedInsights.change} tone="info" />
+        <StatCard icon={ShieldAlert} label="Detected Issues" value={insight.stats.detectedIssues.value} change={insight.stats.detectedIssues.change} tone="danger" />
+        <StatCard icon={CheckCircle2} label="Resolved Signals" value={insight.stats.resolvedSignals.value} change={insight.stats.resolvedSignals.change} />
       </div>
 
       <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_420px]">
@@ -32,7 +50,7 @@ export default function AISummaryPage() {
           <div className="grid place-items-center rounded-[24px] bg-[#f6faf5] p-8 text-center">
             <span className="text-[72px] font-black leading-none text-[#07513b]">{insight.score}</span>
             <b className="mt-2 text-[#10231c]">Public Trust Score</b>
-            <p className="m-0 mt-3 text-sm leading-6 text-[#6d7e75]">Skor gabungan dari sentimen, reach, issue velocity, dan stabilitas percakapan.</p>
+            <p className="m-0 mt-3 text-sm leading-6 text-[#6d7e75]">{insight.scoreNote}</p>
           </div>
         </Card>
       </div>
@@ -60,7 +78,7 @@ export default function AISummaryPage() {
           </div>
         </Card>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -15,18 +15,16 @@ import {
 } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Modal from "@/components/ui/Modal";
+import { ErrorState, LoadingState } from "@/components/ui/DataState";
 import { useAuth } from "@/context/auth-context";
+import {
+  useIntegrationToggle,
+  usePreferenceUpdate,
+  useSettingsPanels,
+} from "@/hooks/use-settings";
 import { ApiError } from "@/lib/api-client";
-import { settingsIntegrations } from "@/lib/data/dummy-data";
 import { getInitials } from "@/lib/formatters";
-import type { SettingsIntegration } from "@/lib/types";
-
-interface Preference {
-  key: string;
-  title: string;
-  desc: string;
-  checked: boolean;
-}
+import type { MonitoringPreference, SettingsIntegration } from "@/lib/types";
 
 // "fullName" and "phoneNumber" round-trip through GET/PUT
 // /api/v1/auth/profile. The avatar round-trips through POST
@@ -59,33 +57,22 @@ export default function SettingsPage() {
   const [isLoggingOutAll, setIsLoggingOutAll] = useState(false);
   const [logoutAllError, setLogoutAllError] = useState<string | null>(null);
 
-  const [preferences, setPreferences] = useState<Preference[]>([
-    {
-      key: "negativeAlert",
-      title: "Negative sentiment alert",
-      desc: "Notify when negative sentiment rises above threshold.",
-      checked: true,
-    },
-    {
-      key: "dailySummary",
-      title: "Daily AI summary",
-      desc: "Receive daily summary of MBG public conversations.",
-      checked: true,
-    },
-    {
-      key: "keywordSpike",
-      title: "Keyword spike detection",
-      desc: "Detect sudden increase in monitored keywords.",
-      checked: true,
-    },
-    {
-      key: "weeklyReport",
-      title: "Weekly report email",
-      desc: "Send scheduled sentiment report every Monday.",
-      checked: false,
-    },
-  ]);
-  const [integrations, setIntegrations] = useState<SettingsIntegration[]>(settingsIntegrations);
+  const {
+    data: panels,
+    isLoading: isPanelsLoading,
+    error: panelsError,
+    refetch: refetchPanels,
+  } = useSettingsPanels();
+  const { mutate: savePreference } = usePreferenceUpdate();
+  const { mutate: switchIntegration } = useIntegrationToggle();
+
+  // The fetched panels are the source of truth until a toggle overrides them,
+  // which avoids mirroring server data into state via an effect.
+  const [preferenceOverride, setPreferenceOverride] = useState<MonitoringPreference[] | null>(null);
+  const [integrationOverride, setIntegrationOverride] = useState<SettingsIntegration[] | null>(null);
+
+  const preferences = preferenceOverride ?? panels?.preferences ?? [];
+  const integrations = integrationOverride ?? panels?.integrations ?? [];
 
   const updateProfileField = (key: keyof typeof profile, value: string) => {
     setProfile((currentProfile) => ({
@@ -152,17 +139,30 @@ export default function SettingsPage() {
     }
   };
 
-  const togglePreference = (key: string) => {
-    setPreferences((currentPreferences) =>
-      currentPreferences.map((item) =>
-        item.key === key ? { ...item, checked: !item.checked } : item,
-      ),
+  // Both toggles flip locally first so the switch feels instant, then reconcile
+  // with whatever the server returns — and roll back if the call fails.
+  const togglePreference = async (key: string) => {
+    const previous = preferences;
+    const optimistic = preferences.map((item) =>
+      item.key === key ? { ...item, checked: !item.checked } : item,
     );
+    const target = optimistic.find((item) => item.key === key);
+    if (!target) return;
+
+    setPreferenceOverride(optimistic);
+
+    try {
+      setPreferenceOverride(await savePreference({ key, checked: target.checked }));
+    } catch {
+      setPreferenceOverride(previous);
+    }
   };
 
-  const toggleIntegration = (name: string) => {
-    setIntegrations((currentIntegrations) =>
-      currentIntegrations.map((item) =>
+  const toggleIntegration = async (name: string) => {
+    const previous = integrations;
+
+    setIntegrationOverride(
+      integrations.map((item) =>
         item.name === name
           ? {
               ...item,
@@ -171,6 +171,12 @@ export default function SettingsPage() {
           : item,
       ),
     );
+
+    try {
+      setIntegrationOverride(await switchIntegration(name));
+    } catch {
+      setIntegrationOverride(previous);
+    }
   };
 
   return (
@@ -305,6 +311,11 @@ export default function SettingsPage() {
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
         <Card title="Monitoring Preferences" className="p-7">
+          {isPanelsLoading ? (
+            <LoadingState message="Memuat preferensi..." />
+          ) : !panels ? (
+            <ErrorState message={panelsError ?? "Preferensi tidak tersedia."} onRetry={refetchPanels} />
+          ) : (
           <div className="grid gap-4 md:grid-cols-2 sm:grid-cols-1">
             {preferences.map((item) => (
               <Toggle
@@ -316,9 +327,15 @@ export default function SettingsPage() {
               />
             ))}
           </div>
+          )}
         </Card>
 
         <Card title="Data Integrations" className="p-7">
+          {isPanelsLoading ? (
+            <LoadingState message="Memuat integrasi..." />
+          ) : !panels ? (
+            <ErrorState message={panelsError ?? "Integrasi tidak tersedia."} onRetry={refetchPanels} />
+          ) : (
           <div className="grid gap-3">
             {integrations.map((item) => {
               const isOperational = item.status === "Operational";
@@ -344,6 +361,7 @@ export default function SettingsPage() {
               );
             })}
           </div>
+          )}
         </Card>
       </div>
 

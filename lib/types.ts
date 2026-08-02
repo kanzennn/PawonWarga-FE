@@ -77,6 +77,49 @@ export interface WordCloudWord {
   value: number;
 }
 
+// A headline number plus its period-over-period delta, as rendered by StatCard.
+export interface MetricValue {
+  value: string;
+  change: string;
+}
+
+export interface TopicSlice {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface SentimentDriver {
+  name: string;
+  value: string;
+  tone: Sentiment;
+  label: string;
+  /** 0-100, drives the progress bar width. */
+  progress: number;
+}
+
+export interface DataSourceStatus {
+  /** Short badge code rendered in the tile, e.g. "X", "IG", "TT". */
+  code: string;
+  label: string;
+  value: string;
+  active: boolean;
+}
+
+export interface TrendInsight {
+  label: string;
+  value: string;
+  desc: string;
+  tone: "positive" | "neutral" | "info";
+}
+
+export interface MonitoringPreference {
+  key: string;
+  title: string;
+  desc: string;
+  checked: boolean;
+}
+
 // Mirrors PawonWarga-BE's model.User JSON shape (internal/model/user.go).
 export interface AuthUser {
   id: number;

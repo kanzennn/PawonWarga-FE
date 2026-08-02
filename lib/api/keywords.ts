@@ -16,6 +16,8 @@ export async function getKeywords(
         withQuery(endpoints.keywords.list, {
           q: query.query,
           sentiment: query.sentiment,
+          from: query.from,
+          to: query.to,
         }),
         { token },
       );

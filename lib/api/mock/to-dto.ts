@@ -16,7 +16,7 @@ export function toPlatformDatumDto(item: PlatformDatum): PlatformDatumDto {
     positive: item.positive,
     negative: item.negative,
     neutral: item.neutral,
-    mention_count: item.mentionCount ?? null,
+    mention_count: item.mentionCount,
   };
 }
 

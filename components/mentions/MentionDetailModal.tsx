@@ -21,7 +21,7 @@ export default function MentionDetailModal() {
           </div>
           <div className="grid gap-3 rounded-2xl bg-[#f6faf5] p-4 sm:grid-cols-2">
             <Info label="Platform" value={selectedMention.platform} />
-            <Info label="Location" value={selectedMention.location} />
+            <Info label="Location" value={selectedMention.location || "-"} />
             <Info label="Engagement" value={selectedMention.engagement} />
             <Info label="Time" value={selectedMention.time} />
             <Info label="Category" value={selectedMention.category || "-"} />

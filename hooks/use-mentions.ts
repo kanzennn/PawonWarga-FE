@@ -10,6 +10,15 @@ export function useMentions(query: MentionQuery = {}): ApiQueryState<MentionList
 
   return useApiQuery(
     () => getMentions(query, token ?? undefined),
-    [query.query, query.platform, query.sentiment, query.page, query.perPage, token],
+    [
+      query.query,
+      query.platform,
+      query.sentiment,
+      query.from,
+      query.to,
+      query.page,
+      query.perPage,
+      token,
+    ],
   );
 }

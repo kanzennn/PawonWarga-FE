@@ -65,7 +65,7 @@ export interface PlatformDatumDto {
   positive: number;
   negative: number;
   neutral: number;
-  mention_count?: number | null;
+  mention_count: number;
 }
 
 export interface Pagination {
@@ -87,6 +87,10 @@ export interface PaginationDto {
 export interface DashboardQuery {
   /** Backend-defined range key, e.g. "this_month" or "2025-05-01..2025-05-31". */
   range?: string;
+  /** ISO date "YYYY-MM-DD" (WIB) from the topbar date-range picker — both
+   * omitted means "view without a date range" (all-time). */
+  from?: string;
+  to?: string;
 }
 
 export type SentimentDriverDto = SentimentDriver;
@@ -142,6 +146,10 @@ export interface MentionQuery {
   query?: string;
   platform?: string;
   sentiment?: string;
+  /** ISO date "YYYY-MM-DD" (WIB) from the topbar date-range picker — both
+   * omitted means "view without a date range" (all-time). */
+  from?: string;
+  to?: string;
   page?: number;
   perPage?: number;
 }
@@ -164,6 +172,10 @@ export interface MentionListResponseDto {
   metrics: {
     live_mentions: number;
     total_engagement: number;
+    /** Real comment count (comments table), same filter as items — distinct
+     * from total_engagement, which is like/comment/share counters stored on
+     * the posts themselves. */
+    total_comments: number;
     unique_authors: number;
     flagged_issues: number;
   };
@@ -176,6 +188,10 @@ export interface MentionListResponseDto {
 
 export interface SentimentQuery {
   range?: string;
+  /** ISO date "YYYY-MM-DD" (WIB) from the topbar date-range picker — both
+   * omitted means "view without a date range" (all-time). */
+  from?: string;
+  to?: string;
 }
 
 export interface SentimentOverview {
@@ -219,6 +235,10 @@ export interface SentimentOverviewDto {
 export interface KeywordQuery {
   query?: string;
   sentiment?: string;
+  /** ISO date "YYYY-MM-DD" (WIB) from the topbar date-range picker — both
+   * omitted means "view without a date range" (all-time). */
+  from?: string;
+  to?: string;
 }
 
 export interface KeywordListResult {

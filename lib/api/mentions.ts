@@ -18,6 +18,8 @@ export async function getMentions(
           q: query.query,
           platform: query.platform,
           sentiment: query.sentiment,
+          from: query.from,
+          to: query.to,
           page: query.page,
           per_page: query.perPage,
         }),

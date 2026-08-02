@@ -26,11 +26,16 @@ import {
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useDateRange } from "@/context/date-range-context";
 import { useSentimentOverview } from "@/hooks/use-sentiment";
 import type { SentimentOverview } from "@/lib/api/types";
 
 export default function SentimentAnalysisPage() {
-  const { data, isLoading, error, refetch } = useSentimentOverview();
+  const { range } = useDateRange();
+  const { data, isLoading, error, refetch } = useSentimentOverview({
+    from: range.from ?? undefined,
+    to: range.to ?? undefined,
+  });
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">

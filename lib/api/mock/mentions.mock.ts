@@ -35,6 +35,7 @@ export function buildMentionList(query: MentionQuery = {}): MentionListResponseD
     metrics: {
       live_mentions: metrics.liveMentions,
       total_engagement: metrics.totalEngagement,
+      total_comments: metrics.totalComments,
       unique_authors: metrics.uniqueAuthors,
       flagged_issues: metrics.flaggedIssues,
     },

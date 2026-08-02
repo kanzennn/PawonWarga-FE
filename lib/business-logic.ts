@@ -5,6 +5,7 @@ import {
   platformData,
   sentimentDistribution,
 } from "@/lib/data/dummy-data";
+import { USE_MOCK_API } from "@/lib/api/config";
 import type { Keyword, Mention, PlatformDatum, ReportListItem, Sentiment } from "@/lib/types";
 
 export interface PlatformMeta {
@@ -110,6 +111,19 @@ export function formatCompact(value: number): string {
   }).format(value);
 }
 
+// formatStatCount renders a plain grouped number below 10,000, or a
+// one-decimal "13.4k"/"2.1m" abbreviation at or above it — the stat-card
+// convention on the Social Monitoring page's top 4 cards.
+export function formatStatCount(value: number): string {
+  if (value < 10000) return value.toLocaleString("en-US");
+  return Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  })
+    .format(value)
+    .toLowerCase();
+}
+
 export interface MentionFilters {
   query?: string;
   platform?: string;
@@ -147,6 +161,10 @@ export function filterMentions(items: Mention[] = mentions, filters: MentionFilt
 export interface MentionMetrics {
   liveMentions: number;
   totalEngagement: number;
+  /** Real comment count, distinct from totalEngagement (like/comment/share
+   * counters stored on the posts themselves). Dummy data has no separate
+   * comment records, so this is always 0 in mock mode. */
+  totalComments: number;
   uniqueAuthors: number;
   flaggedIssues: number;
 }
@@ -162,15 +180,14 @@ export function summarizeMentions(items: Mention[] = mentions): MentionMetrics {
   return {
     liveMentions: items.length,
     totalEngagement,
+    totalComments: 0,
     uniqueAuthors,
     flaggedIssues: flaggedIssues.length,
   };
 }
 
 export function aggregatePlatformVolume(items: Mention[] = mentions): PlatformDatum[] {
-  if (items.length === mentions.length) {
-    return platformData.map((item) => ({ ...item, mentionCount: null }));
-  }
+  const isFiltered = items.length !== mentions.length;
 
   const totals = platformData.map((platform) => {
     const platformMentions = items.filter((item) => item.platform === platform.name);
@@ -186,7 +203,7 @@ export function aggregatePlatformVolume(items: Mention[] = mentions): PlatformDa
     };
   });
 
-  return totals.filter((item) => item.value > 0 || items.length === mentions.length);
+  return totals.filter((item) => item.value > 0 || !isFiltered);
 }
 
 export interface KeywordFilters {
@@ -538,7 +555,9 @@ export function generateReportDocument({
     sections:
       sectionsByTemplate[preview.template.id] || sectionsByTemplate["executive-brief"],
     appendix: [
-      "Data pada prototype ini menggunakan dummy conversations.",
+      USE_MOCK_API
+        ? "Data pada prototype ini menggunakan dummy conversations."
+        : "Data pada laporan ini diambil dari percakapan publik asli yang dipantau sistem.",
       "Template dapat dikembangkan menjadi export dokumen, Excel, atau PowerPoint pada tahap backend/export berikutnya.",
     ],
   };

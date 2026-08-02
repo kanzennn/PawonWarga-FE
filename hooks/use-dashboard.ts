@@ -12,6 +12,6 @@ export function useDashboardOverview(
 
   return useApiQuery(
     () => getDashboardOverview(query, token ?? undefined),
-    [query.range, token],
+    [query.range, query.from, query.to, token],
   );
 }

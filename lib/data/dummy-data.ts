@@ -27,12 +27,15 @@ export const sentimentTrend: SentimentTrendPoint[] = [
   { day: "31 Mei", positive: 77, neutral: 28, negative: 13 },
 ];
 
+// mentionCount here is just a plausible seed value — lib/business-logic.ts's
+// aggregatePlatformVolume() always recomputes it from the actual filtered
+// mention set, overriding this.
 export const platformData: PlatformDatum[] = [
-  { name: "X", value: 45200, positive: 62, negative: 22, neutral: 16 },
-  { name: "Instagram", value: 32100, positive: 75, negative: 14, neutral: 11 },
-  { name: "TikTok", value: 21400, positive: 69, negative: 20, neutral: 11 },
-  { name: "News", value: 18700, positive: 54, negative: 24, neutral: 22 },
-  { name: "YouTube", value: 11000, positive: 71, negative: 17, neutral: 12 },
+  { name: "X", value: 45200, positive: 62, negative: 22, neutral: 16, mentionCount: 3120 },
+  { name: "Instagram", value: 32100, positive: 75, negative: 14, neutral: 11, mentionCount: 2480 },
+  { name: "TikTok", value: 21400, positive: 69, negative: 20, neutral: 11, mentionCount: 1750 },
+  { name: "News", value: 18700, positive: 54, negative: 24, neutral: 22, mentionCount: 940 },
+  { name: "YouTube", value: 11000, positive: 71, negative: 17, neutral: 12, mentionCount: 610 },
 ];
 
 export const sentimentDistribution: SentimentDistributionSlice[] = [

@@ -8,25 +8,31 @@ import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useDateRange } from "@/context/date-range-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useKeywords } from "@/hooks/use-keywords";
 import { formatCompact } from "@/lib/business-logic";
 import type { KeywordListResult, KeywordQuery } from "@/lib/api/types";
 
+type KeywordFilters = Required<Pick<KeywordQuery, "query" | "sentiment">>;
+
 export default function KeywordSentimentPage() {
-  const [filters, setFilters] = useState<Required<KeywordQuery>>({
+  const [filters, setFilters] = useState<KeywordFilters>({
     query: "",
     sentiment: "All Sentiments",
   });
+  const { range } = useDateRange();
 
   // The input stays bound to `filters.query`, only the request is debounced.
   const debouncedQuery = useDebouncedValue(filters.query);
   const { data, isLoading, error, refetch } = useKeywords({
     query: debouncedQuery,
     sentiment: filters.sentiment,
+    from: range.from ?? undefined,
+    to: range.to ?? undefined,
   });
 
-  const updateFilter = (key: keyof KeywordQuery, value: string) => {
+  const updateFilter = (key: keyof KeywordFilters, value: string) => {
     setFilters((currentFilters) => ({
       ...currentFilters,
       [key]: value,
@@ -50,8 +56,8 @@ export default function KeywordSentimentPage() {
 
 interface KeywordContentProps {
   data: KeywordListResult;
-  filters: Required<KeywordQuery>;
-  onFilterChange: (key: keyof KeywordQuery, value: string) => void;
+  filters: KeywordFilters;
+  onFilterChange: (key: keyof KeywordFilters, value: string) => void;
 }
 
 function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) {

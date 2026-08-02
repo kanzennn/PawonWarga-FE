@@ -13,7 +13,7 @@ export interface PlatformDatum {
   positive: number;
   negative: number;
   neutral: number;
-  mentionCount?: number | null;
+  mentionCount: number;
 }
 
 export interface SentimentDistributionSlice {

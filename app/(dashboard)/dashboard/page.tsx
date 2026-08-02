@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
   Bot,
   MessageCircle,
@@ -26,6 +27,7 @@ import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useDateRange } from "@/context/date-range-context";
 import { useMention } from "@/context/mention-context";
 import { useDashboardOverview } from "@/hooks/use-dashboard";
 import type { DashboardOverview } from "@/lib/api/types";
@@ -41,7 +43,11 @@ const sourceMeta: Record<string, { bg: string; text: string }> = {
 };
 
 export default function DashboardPage() {
-  const { data, isLoading, error, refetch } = useDashboardOverview();
+  const { range } = useDateRange();
+  const { data, isLoading, error, refetch } = useDashboardOverview({
+    from: range.from ?? undefined,
+    to: range.to ?? undefined,
+  });
 
   return (
     <div className="min-w-0 pb-16 lg:pb-0">
@@ -102,12 +108,7 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
               <h3 className="m-0 text-[15px] font-black">
                 Public Sentiment Overview
-              </h3>
-
-              <span className="inline-flex h-[30px] items-center gap-2 rounded-full bg-[#3ea84e]/40 px-3 text-xs font-black text-[#dcffc4]">
-                <Bot size={14} />
-                AI Insight Active
-              </span>
+              </h3> 
             </div>
 
             <h2 className="relative z-10 my-3 max-w-xs text-[38px] font-black leading-none text-[#b9fb7d]">
@@ -338,9 +339,12 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
             title="Recent Conversations"
             className="p-5"
             action={
-              <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]">
+              <Link
+                href="/monitoring"
+                className="inline-flex h-9 items-center rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]"
+              >
                 View All
-              </button>
+              </Link>
             }
           >
             <div className="overflow-x-auto">
@@ -362,8 +366,8 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
                   <span className="grid h-8 w-8 place-items-center rounded-full bg-[#061a16] font-black text-white">
                     {item.platform[0]}
                   </span>
-                  <b className="text-[#10231c]">{item.user}</b>
-                  <p className="m-0 leading-relaxed text-[#10231c]">
+                  <b className="truncate text-[#10231c]">{item.user}</b>
+                  <p className="m-0 truncate leading-relaxed text-[#10231c]">
                     {item.text}
                   </p>
                   <Badge tone={item.sentiment}>{item.sentiment}</Badge>

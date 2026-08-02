@@ -19,7 +19,11 @@ export async function getSentimentOverview(
   const dto = USE_MOCK_API
     ? await mockResponse(buildSentimentOverview)
     : await apiFetch<SentimentOverviewDto>(
-        withQuery(endpoints.sentiment.overview, { range: query.range }),
+        withQuery(endpoints.sentiment.overview, {
+          range: query.range,
+          from: query.from,
+          to: query.to,
+        }),
         { token },
       );
 

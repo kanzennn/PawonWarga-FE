@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Filter, MessageCircle, Radio, Search, UsersRound } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, MessageCircle, Radio, Search, UsersRound } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { useDateRange } from "@/context/date-range-context";
 import { useMention } from "@/context/mention-context";
 import { useMentions } from "@/hooks/use-mentions";
-import { formatCompact, platformMeta } from "@/lib/business-logic";
+import { USE_MOCK_API } from "@/lib/api/config";
+import { formatStatCount, platformMeta } from "@/lib/business-logic";
 import type { MentionListResult, MentionQuery } from "@/lib/api/types";
 
 type MonitoringFilters = Required<Pick<MentionQuery, "query" | "platform" | "sentiment">>;
@@ -22,8 +24,28 @@ const INITIAL_FILTERS: MonitoringFilters = {
 export default function SocialMonitoringPage() {
   const [draftFilters, setDraftFilters] = useState<MonitoringFilters>(INITIAL_FILTERS);
   const [filters, setFilters] = useState<MonitoringFilters>(INITIAL_FILTERS);
+  const [page, setPage] = useState(1);
+  const { range } = useDateRange();
 
-  const { data, isLoading, error, refetch } = useMentions(filters);
+  // Any filter or date-range change invalidates the current page — jump
+  // back to page 1 rather than risk landing past the end of a shorter
+  // result set. Adjusted during render (not an effect) per
+  // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
+  const filterKey = `${filters.query}|${filters.platform}|${filters.sentiment}|${range.from ?? ""}|${range.to ?? ""}`;
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+  let effectivePage = page;
+  if (filterKey !== lastFilterKey) {
+    setLastFilterKey(filterKey);
+    setPage(1);
+    effectivePage = 1;
+  }
+
+  const { data, isLoading, error, refetch } = useMentions({
+    ...filters,
+    from: range.from ?? undefined,
+    to: range.to ?? undefined,
+    page: effectivePage,
+  });
 
   const updateDraftFilter = (key: keyof MonitoringFilters, value: string) => {
     setDraftFilters((currentFilters) => ({
@@ -41,7 +63,7 @@ export default function SocialMonitoringPage() {
     <div className="min-w-0 pb-24 lg:pb-0">
       <PageHeading
         title="Social Monitoring"
-        subtitle="Pantau percakapan publik tentang MBG secara real-time dari berbagai platform."
+        subtitle="Monitor public conversations about MBG in real-time across platforms."
       />
 
       {isLoading ? (
@@ -54,6 +76,8 @@ export default function SocialMonitoringPage() {
           draftFilters={draftFilters}
           onDraftChange={updateDraftFilter}
           onApply={applyFilters}
+          page={effectivePage}
+          onPageChange={setPage}
         />
       )}
     </div>
@@ -65,6 +89,8 @@ interface MonitoringContentProps {
   draftFilters: MonitoringFilters;
   onDraftChange: (key: keyof MonitoringFilters, value: string) => void;
   onApply: (event: React.FormEvent) => void;
+  page: number;
+  onPageChange: (page: number) => void;
 }
 
 function MonitoringContent({
@@ -72,12 +98,21 @@ function MonitoringContent({
   draftFilters,
   onDraftChange,
   onApply,
+  page,
+  onPageChange,
 }: MonitoringContentProps) {
   const { selectMention } = useMention();
-  const { items: filteredMentions, metrics, platformVolume, platforms, totalUnfiltered } = data;
+  const { items: filteredMentions, metrics, platformVolume, platforms, pagination } = data;
 
-  const totalPlatformValue = platformVolume.reduce(
-    (total, item) => total + item.value,
+  const rangeStart = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.perPage + 1;
+  const rangeEnd = Math.min(pagination.page * pagination.perPage, pagination.total);
+
+  // "Total Mentions" and each platform's "% of total conversations" /
+  // "N mentions" are counts (posts + comments), not engagement — item.value
+  // (likes+comments+shares) only drives the bar's relative width via the
+  // same percentage below.
+  const totalPlatformMentions = platformVolume.reduce(
+    (total, item) => total + item.mentionCount,
     0,
   );
 
@@ -86,27 +121,27 @@ function MonitoringContent({
       <div className="mb-5 grid gap-4 xl:grid-cols-4">
         <StatCard
           icon={Radio}
-          label="Live Mentions"
-          value={String(metrics.liveMentions)}
+          label="Total Posts"
+          value={formatStatCount(metrics.liveMentions)}
           change="Filtered"
         />
         <StatCard
           icon={MessageCircle}
           label="Total Comments"
-          value={formatCompact(metrics.totalEngagement)}
-          change="Engagement"
+          value={formatStatCount(metrics.totalComments)}
+          change="Comments"
         />
         <StatCard
           icon={UsersRound}
           label="Unique Authors"
-          value={String(metrics.uniqueAuthors)}
+          value={formatStatCount(metrics.uniqueAuthors)}
           change="Authors"
           tone="info"
         />
         <StatCard
           icon={Filter}
           label="Flagged Issues"
-          value={String(metrics.flaggedIssues)}
+          value={formatStatCount(metrics.flaggedIssues)}
           change="Negative"
           tone="danger"
         />
@@ -166,8 +201,8 @@ function MonitoringContent({
                   Real-time public conversations
                 </p>
                 <p className="m-0 mt-1 text-xs font-bold text-[#6d7e75]">
-                  Showing {filteredMentions.length} of {totalUnfiltered} dummy
-                  conversations
+                  Showing {rangeStart}-{rangeEnd} of {pagination.total}{" "}
+                  {USE_MOCK_API ? "dummy" : "public"} conversations
                 </p>
               </div>
 
@@ -256,12 +291,40 @@ function MonitoringContent({
                 <div className="rounded-2xl border border-dashed border-[#cbdccd] bg-[#fbfdf8] p-6 text-center">
                   <b className="text-[#10231c]">Tidak ada mention yang cocok.</b>
                   <p className="m-0 mt-2 text-sm leading-6 text-[#6d7e75]">
-                    Ubah keyword, platform, atau sentimen untuk melihat dummy
-                    conversation lain.
+                    Ubah keyword, platform, atau sentimen untuk melihat percakapan lain.
                   </p>
                 </div>
               )}
             </div>
+
+            {pagination.totalPages > 1 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#dce8df] pt-4">
+                <p className="m-0 text-xs font-bold text-[#6d7e75]">
+                  Page {pagination.page} of {pagination.totalPages}
+                </p>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => onPageChange(page - 1)}
+                    disabled={pagination.page <= 1}
+                    className="grid h-9 w-9 place-items-center rounded-xl border border-[#dce8df] bg-white text-[#07513b] transition hover:bg-[#f8fbf5] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft size={17} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPageChange(page + 1)}
+                    disabled={pagination.page >= pagination.totalPages}
+                    className="grid h-9 w-9 place-items-center rounded-xl border border-[#dce8df] bg-white text-[#07513b] transition hover:bg-[#f8fbf5] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-white"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight size={17} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
@@ -272,7 +335,7 @@ function MonitoringContent({
                 Total Mentions
               </p>
               <h3 className="m-0 mt-1 text-[28px] font-black tracking-[-0.5px] text-[#10231c]">
-                {totalPlatformValue.toLocaleString()}
+                {totalPlatformMentions.toLocaleString()}
               </h3>
               <p className="m-0 mt-1 text-xs font-bold text-[#6d7e75]">
                 Across all monitored platforms
@@ -281,8 +344,8 @@ function MonitoringContent({
 
             <div className="grid gap-3">
               {platformVolume.map((item, index) => {
-                const percentage = totalPlatformValue
-                  ? Math.round((item.value / totalPlatformValue) * 100)
+                const percentage = totalPlatformMentions
+                  ? Math.round((item.mentionCount / totalPlatformMentions) * 100)
                   : 0;
 
                 const platformColor =
@@ -331,7 +394,7 @@ function MonitoringContent({
 
                       <div className="text-right">
                         <b className="block text-sm font-black text-[#10231c]">
-                          {item.value.toLocaleString()}
+                          {item.mentionCount.toLocaleString()}
                         </b>
                         <small className="font-bold text-[#6d7e75]">
                           mentions

@@ -13,7 +13,11 @@ export async function getDashboardOverview(
   const dto = USE_MOCK_API
     ? await mockResponse(buildDashboardOverview)
     : await apiFetch<DashboardOverviewDto>(
-        withQuery(endpoints.dashboard.overview, { range: query.range }),
+        withQuery(endpoints.dashboard.overview, {
+          range: query.range,
+          from: query.from,
+          to: query.to,
+        }),
         { token },
       );
 

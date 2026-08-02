@@ -31,7 +31,7 @@ export function mapPlatformDatum(dto: PlatformDatumDto): PlatformDatum {
     positive: dto.positive,
     negative: dto.negative,
     neutral: dto.neutral,
-    mentionCount: dto.mention_count ?? null,
+    mentionCount: dto.mention_count,
   };
 }
 
@@ -75,6 +75,7 @@ export function mapMentionList(dto: MentionListResponseDto): MentionListResult {
     metrics: {
       liveMentions: dto.metrics.live_mentions,
       totalEngagement: dto.metrics.total_engagement,
+      totalComments: dto.metrics.total_comments,
       uniqueAuthors: dto.metrics.unique_authors,
       flaggedIssues: dto.metrics.flagged_issues,
     },

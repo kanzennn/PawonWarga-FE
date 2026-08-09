@@ -1,10 +1,21 @@
 export type Sentiment = "positive" | "negative" | "neutral";
 
+// positive/neutral/negative's meaning differs by page: Dashboard's
+// "Sentiment Trend" chart uses raw mention counts per point; Sentiment
+// Analysis's "Sentiment Over Time" chart uses each point's percentage
+// share (0-100) — matches the backend's /dashboard/overview vs
+// /sentiment/overview response shapes. The *Count fields are the raw
+// mention counts for that same point — only present on /sentiment/overview
+// (backs its Percentage/Total toggle); absent on /dashboard/overview, whose
+// positive/neutral/negative are already raw counts.
 export interface SentimentTrendPoint {
   day: string;
   positive: number;
   neutral: number;
   negative: number;
+  positiveCount?: number;
+  neutralCount?: number;
+  negativeCount?: number;
 }
 
 export interface PlatformDatum {
@@ -33,6 +44,17 @@ export interface Mention {
   location: string;
   category: string;
   risk: "Low" | "Medium" | "High";
+  /** Link to the original post on its source platform — "" if none was captured. */
+  url: string;
+}
+
+export interface Comment {
+  id: number;
+  user: string;
+  text: string;
+  sentiment: Sentiment;
+  engagement: string;
+  time: string;
 }
 
 export interface Keyword {

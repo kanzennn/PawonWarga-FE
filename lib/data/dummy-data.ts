@@ -56,6 +56,7 @@ export const mentions: Mention[] = [
     location: "Jawa Barat",
     category: "Nutrition",
     risk: "Low",
+    url: "",
   },
   {
     id: 2,
@@ -68,6 +69,7 @@ export const mentions: Mention[] = [
     location: "Jawa Timur",
     category: "School Access",
     risk: "Low",
+    url: "",
   },
   {
     id: 3,
@@ -80,6 +82,7 @@ export const mentions: Mention[] = [
     location: "DKI Jakarta",
     category: "Distribution",
     risk: "High",
+    url: "",
   },
   {
     id: 4,
@@ -92,6 +95,7 @@ export const mentions: Mention[] = [
     location: "Jawa Tengah",
     category: "Food Quality",
     risk: "Medium",
+    url: "",
   },
   {
     id: 5,
@@ -104,6 +108,7 @@ export const mentions: Mention[] = [
     location: "Bali",
     category: "Food Quality",
     risk: "High",
+    url: "",
   },
   {
     id: 6,
@@ -116,6 +121,7 @@ export const mentions: Mention[] = [
     location: "Sulawesi Selatan",
     category: "Food Quality",
     risk: "Medium",
+    url: "",
   },
 ];
 

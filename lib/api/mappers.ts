@@ -2,11 +2,13 @@
 // lib/api/* passes through here, including mocked ones, so the mapping path is
 // exercised long before the real backend exists. When PawonWarga-BE ships a
 // field under a different name, this file is the only thing that changes.
-import type { PlatformDatum } from "@/lib/types";
+import type { PlatformDatum, SentimentTrendPoint } from "@/lib/types";
 import type { ReportDocument, ReportTemplate } from "@/lib/business-logic";
 import type {
   AiInsight,
   AiInsightDto,
+  CommentListResponseDto,
+  CommentListResult,
   DashboardOverview,
   DashboardOverviewDto,
   KeywordListResponseDto,
@@ -22,6 +24,7 @@ import type {
   ReportTemplateDto,
   SentimentOverview,
   SentimentOverviewDto,
+  TrendPointDto,
 } from "@/lib/api/types";
 
 export function mapPlatformDatum(dto: PlatformDatumDto): PlatformDatum {
@@ -57,7 +60,7 @@ export function mapDashboardOverview(dto: DashboardOverviewDto): DashboardOvervi
       negative: dto.summary.negative,
       neutral: dto.summary.neutral,
     },
-    trend: dto.trend,
+    trend: dto.trend.map(mapTrendPoint),
     topicDistribution: dto.topic_distribution,
     topicTotal: dto.topic_total,
     keywordCloud: dto.keyword_cloud,
@@ -85,6 +88,25 @@ export function mapMentionList(dto: MentionListResponseDto): MentionListResult {
   };
 }
 
+export function mapCommentList(dto: CommentListResponseDto): CommentListResult {
+  return {
+    items: dto.items,
+    pagination: mapPagination(dto.pagination),
+  };
+}
+
+function mapTrendPoint(dto: TrendPointDto): SentimentTrendPoint {
+  return {
+    day: dto.day,
+    positive: dto.positive,
+    neutral: dto.neutral,
+    negative: dto.negative,
+    positiveCount: dto.positive_count,
+    neutralCount: dto.neutral_count,
+    negativeCount: dto.negative_count,
+  };
+}
+
 export function mapSentimentOverview(dto: SentimentOverviewDto): SentimentOverview {
   return {
     score: dto.score,
@@ -92,7 +114,7 @@ export function mapSentimentOverview(dto: SentimentOverviewDto): SentimentOvervi
     description: dto.description,
     summary: dto.summary,
     distribution: dto.distribution,
-    trend: dto.trend,
+    trend: dto.trend.map(mapTrendPoint),
     trendInsights: dto.trend_insights,
     byPlatform: dto.by_platform.map(mapPlatformDatum),
     byCategory: dto.by_category,

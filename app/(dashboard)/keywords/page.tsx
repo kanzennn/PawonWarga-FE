@@ -9,6 +9,7 @@ import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
 import { useDateRange } from "@/context/date-range-context";
+import { usePlatform } from "@/context/platform-context";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useKeywords } from "@/hooks/use-keywords";
 import { formatCompact } from "@/lib/business-logic";
@@ -22,6 +23,7 @@ export default function KeywordSentimentPage() {
     sentiment: "All Sentiments",
   });
   const { range } = useDateRange();
+  const { platform } = usePlatform();
 
   // The input stays bound to `filters.query`, only the request is debounced.
   const debouncedQuery = useDebouncedValue(filters.query);
@@ -30,6 +32,7 @@ export default function KeywordSentimentPage() {
     sentiment: filters.sentiment,
     from: range.from ?? undefined,
     to: range.to ?? undefined,
+    platform: platform ?? undefined,
   });
 
   const updateFilter = (key: keyof KeywordFilters, value: string) => {

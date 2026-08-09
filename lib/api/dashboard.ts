@@ -17,6 +17,7 @@ export async function getDashboardOverview(
           range: query.range,
           from: query.from,
           to: query.to,
+          platform: query.platform,
         }),
         { token },
       );

@@ -25,7 +25,15 @@ export function buildSentimentOverview(): SentimentOverviewDto {
       analyzed: sentimentSummary.analyzed,
     },
     distribution: sentimentDistribution,
-    trend: sentimentTrend,
+    // Dummy data only has percentages — mirror them into the *_count fields
+    // too (not real totals, just enough for the Percentage/Total toggle to
+    // have something to render in mock mode).
+    trend: sentimentTrend.map((point) => ({
+      ...point,
+      positive_count: point.positive,
+      neutral_count: point.neutral,
+      negative_count: point.negative,
+    })),
     trend_insights: sentimentTrendInsights,
     by_platform: platformData.map(toPlatformDatumDto),
     by_category: categorySentiment,

@@ -27,8 +27,10 @@ import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 import { useDateRange } from "@/context/date-range-context";
 import { useMention } from "@/context/mention-context";
+import { usePlatform } from "@/context/platform-context";
 import { useDashboardOverview } from "@/hooks/use-dashboard";
 import type { DashboardOverview } from "@/lib/api/types";
 
@@ -44,9 +46,11 @@ const sourceMeta: Record<string, { bg: string; text: string }> = {
 
 export default function DashboardPage() {
   const { range } = useDateRange();
+  const { platform } = usePlatform();
   const { data, isLoading, error, refetch } = useDashboardOverview({
     from: range.from ?? undefined,
     to: range.to ?? undefined,
+    platform: platform ?? undefined,
   });
 
   return (
@@ -92,6 +96,9 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
   const [activeDistribution, setActiveDistribution] = useState<number | null>(
     null,
+  );
+  const [trendMode, setTrendMode] = useState<"percentage" | "total">(
+    "percentage",
   );
   const [trendChartRef, trendChartWidth] =
     useMeasuredWidth<HTMLDivElement>(640);
@@ -160,9 +167,12 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
                 title="Sentiment Trend"
                 className="p-5"
                 action={
-                  <button className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#dce8df] bg-white px-4 text-sm font-extrabold text-[#10231c] shadow-sm">
-                    This Month
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <ModeToggle value={trendMode} onChange={setTrendMode} />
+                    <button className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#dce8df] bg-white px-4 text-sm font-extrabold text-[#10231c] shadow-sm">
+                      This Month
+                    </button>
+                  </div>
                 }
               >
                 <div className="mb-4 mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm font-extrabold">
@@ -192,21 +202,33 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
                       dy={8}
                     />
 
-                    <YAxis
-                      domain={[0, 100]}
-                      ticks={[0, 25, 50, 75, 100]}
-                      tickFormatter={(value) => `${value}%`}
-                      axisLine={{ stroke: "#d9ded8" }}
-                      tickLine={false}
-                      tick={{ fill: "#5f6d66", fontSize: 12 }}
-                      width={44}
-                    />
+                    {trendMode === "percentage" ? (
+                      <YAxis
+                        domain={[0, 100]}
+                        ticks={[0, 25, 50, 75, 100]}
+                        tickFormatter={(value) => `${value}%`}
+                        axisLine={{ stroke: "#d9ded8" }}
+                        tickLine={false}
+                        tick={{ fill: "#5f6d66", fontSize: 12 }}
+                        width={44}
+                      />
+                    ) : (
+                      <YAxis
+                        allowDecimals={false}
+                        tickFormatter={(value: number) => value.toLocaleString("en-US")}
+                        axisLine={{ stroke: "#d9ded8" }}
+                        tickLine={false}
+                        tick={{ fill: "#5f6d66", fontSize: 12 }}
+                        width={44}
+                      />
+                    )}
 
                     <Tooltip />
 
                     <Line
                       type="monotone"
-                      dataKey="positive"
+                      dataKey={trendMode === "percentage" ? "positive" : "positiveCount"}
+                      name="Positive"
                       stroke="#67c74a"
                       strokeWidth={3}
                       dot={{ r: 4, strokeWidth: 2, fill: "#ffffff" }}
@@ -215,7 +237,8 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
                     <Line
                       type="monotone"
-                      dataKey="neutral"
+                      dataKey={trendMode === "percentage" ? "neutral" : "neutralCount"}
+                      name="Neutral"
                       stroke="#f4ad16"
                       strokeWidth={3}
                       dot={{ r: 4, strokeWidth: 2, fill: "#ffffff" }}
@@ -224,7 +247,8 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
                     <Line
                       type="monotone"
-                      dataKey="negative"
+                      dataKey={trendMode === "percentage" ? "negative" : "negativeCount"}
+                      name="Negative"
                       stroke="#0c2033"
                       strokeWidth={3}
                       dot={{ r: 4, strokeWidth: 2, fill: "#ffffff" }}
@@ -349,8 +373,8 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
           >
             <div className="overflow-x-auto">
               <div className="grid min-w-[760px] grid-cols-[70px_130px_minmax(250px,1fr)_110px_100px_70px] items-center gap-3 rounded-xl bg-[#f4f5f1] px-3.5 py-3 text-xs font-black text-[#6d7e75]">
-                <span>Platform</span>
-                <span>Account</span>
+                <span className="sticky left-3.5 z-10 bg-[#f4f5f1]">Platform</span>
+                <span className="sticky left-[96px] z-10 bg-[#f4f5f1]">Account</span>
                 <span>Post Snippet</span>
                 <span>Sentiment</span>
                 <span>Engagement</span>
@@ -360,13 +384,15 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
               {recentMentions.map((item) => (
                 <button
                   key={item.id}
-                  className="grid min-w-[760px] w-full grid-cols-[70px_130px_minmax(250px,1fr)_110px_100px_70px] items-center gap-3 border-0 border-b border-[#dce8df] bg-transparent px-3.5 py-3.5 text-left transition-colors hover:bg-[#fbfdf8]"
+                  className="group grid min-w-[760px] w-full grid-cols-[70px_130px_minmax(250px,1fr)_110px_100px_70px] items-center gap-3 border-0 border-b border-[#dce8df] bg-transparent px-3.5 py-3.5 text-left transition-colors hover:bg-[#fbfdf8]"
                   onClick={() => selectMention(item)}
                 >
-                  <span className="grid h-8 w-8 place-items-center rounded-full bg-[#061a16] font-black text-white">
+                  <span className="sticky left-3.5 z-10 grid h-8 w-8 place-items-center rounded-full bg-[#061a16] font-black text-white">
                     {item.platform[0]}
                   </span>
-                  <b className="truncate text-[#10231c]">{item.user}</b>
+                  <b className="sticky left-[96px] z-10 truncate bg-white text-[#10231c] group-hover:bg-[#fbfdf8]">
+                    {item.user}
+                  </b>
                   <p className="m-0 truncate leading-relaxed text-[#10231c]">
                     {item.text}
                   </p>

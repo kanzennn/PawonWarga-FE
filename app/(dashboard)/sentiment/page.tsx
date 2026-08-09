@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Bar,
   BarChart,
@@ -26,15 +27,19 @@ import {
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { ModeToggle } from "@/components/ui/ModeToggle";
 import { useDateRange } from "@/context/date-range-context";
+import { usePlatform } from "@/context/platform-context";
 import { useSentimentOverview } from "@/hooks/use-sentiment";
 import type { SentimentOverview } from "@/lib/api/types";
 
 export default function SentimentAnalysisPage() {
   const { range } = useDateRange();
+  const { platform } = usePlatform();
   const { data, isLoading, error, refetch } = useSentimentOverview({
     from: range.from ?? undefined,
     to: range.to ?? undefined,
+    platform: platform ?? undefined,
   });
 
   return (
@@ -70,6 +75,7 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
   } = overview;
 
   const totalSentiment = distribution.reduce((total, item) => total + item.value, 0);
+  const [trendMode, setTrendMode] = useState<"percentage" | "total">("percentage");
 
   return (
     <>
@@ -200,9 +206,9 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
           title="Sentiment Over Time"
           className="p-7"
           action={
-            <button className="grid h-9 w-9 place-items-center rounded-xl border border-[#dce8df] bg-white text-[#07513b] shadow-sm transition hover:bg-[#f8fbf5]">
-              <ArrowUpRight size={17} />
-            </button>
+            <div className="flex items-center gap-2">
+              <ModeToggle value={trendMode} onChange={setTrendMode} />
+            </div>
           }
         >
           <div className="mb-4 flex flex-wrap items-center gap-6 text-sm font-black">
@@ -227,21 +233,33 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
                   dy={8}
                 />
 
-                <YAxis
-                  domain={[0, 100]}
-                  ticks={[0, 25, 50, 75, 100]}
-                  tickFormatter={(value) => `${value}%`}
-                  tickLine={false}
-                  axisLine={{ stroke: "#d9ded8" }}
-                  tick={{ fill: "#5f6d66", fontSize: 13 }}
-                  width={48}
-                />
+                {trendMode === "percentage" ? (
+                  <YAxis
+                    domain={[0, 100]}
+                    ticks={[0, 25, 50, 75, 100]}
+                    tickFormatter={(value) => `${value}%`}
+                    tickLine={false}
+                    axisLine={{ stroke: "#d9ded8" }}
+                    tick={{ fill: "#5f6d66", fontSize: 13 }}
+                    width={48}
+                  />
+                ) : (
+                  <YAxis
+                    allowDecimals={false}
+                    tickFormatter={(value: number) => value.toLocaleString("en-US")}
+                    tickLine={false}
+                    axisLine={{ stroke: "#d9ded8" }}
+                    tick={{ fill: "#5f6d66", fontSize: 13 }}
+                    width={48}
+                  />
+                )}
 
                 <Tooltip />
 
                 <Line
                   type="monotone"
-                  dataKey="positive"
+                  dataKey={trendMode === "percentage" ? "positive" : "positiveCount"}
+                  name="Positive"
                   stroke="#67c74a"
                   strokeWidth={3}
                   dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
@@ -250,7 +268,8 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
 
                 <Line
                   type="monotone"
-                  dataKey="negative"
+                  dataKey={trendMode === "percentage" ? "negative" : "negativeCount"}
+                  name="Negative"
                   stroke="#0c2033"
                   strokeWidth={3}
                   dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
@@ -259,7 +278,8 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
 
                 <Line
                   type="monotone"
-                  dataKey="neutral"
+                  dataKey={trendMode === "percentage" ? "neutral" : "neutralCount"}
+                  name="Neutral"
                   stroke="#f4b21b"
                   strokeWidth={3}
                   dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
@@ -307,10 +327,11 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
                 tick={{ fill: "#5f6d66", fontSize: 13 }}
               />
               <Tooltip />
-              <Bar dataKey="positive" stackId="a" fill="#67c74a" />
-              <Bar dataKey="neutral" stackId="a" fill="#f4b21b" />
+              <Bar dataKey="positive" name="Positive" stackId="a" fill="#67c74a" />
+              <Bar dataKey="neutral" name="Neutral" stackId="a" fill="#f4b21b" />
               <Bar
                 dataKey="negative"
+                name="Negative"
                 stackId="a"
                 fill="#0c2033"
                 radius={[8, 8, 0, 0]}
@@ -345,8 +366,8 @@ function SentimentContent({ overview }: { overview: SentimentOverview }) {
                 tick={{ fontSize: 12, fill: "#5f6d66" }}
               />
               <Tooltip />
-              <Bar dataKey="positive" fill="#67c74a" radius={[0, 8, 8, 0]} />
-              <Bar dataKey="negative" fill="#0c2033" radius={[0, 8, 8, 0]} />
+              <Bar dataKey="positive" name="Positive" fill="#67c74a" radius={[0, 8, 8, 0]} />
+              <Bar dataKey="negative" name="Negative" fill="#0c2033" radius={[0, 8, 8, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>

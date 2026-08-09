@@ -5,6 +5,7 @@
 // the two, so a backend contract change is a one-file fix.
 import type {
   CategorySentiment,
+  Comment,
   DataSourceStatus,
   Keyword,
   LocationSentiment,
@@ -34,8 +35,8 @@ import type {
 // Types whose field names are already identical on both sides — no mapping
 // needed, aliased so services can still name the wire side explicitly.
 export type MentionDto = Mention;
+export type CommentDto = Comment;
 export type KeywordDto = Keyword;
-export type SentimentTrendPointDto = SentimentTrendPoint;
 export type SentimentDistributionSliceDto = SentimentDistributionSlice;
 export type CategorySentimentDto = CategorySentiment;
 export type LocationSentimentDto = LocationSentiment;
@@ -91,6 +92,9 @@ export interface DashboardQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
+  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+   * omitted means "All Platforms". */
+  platform?: string;
 }
 
 export type SentimentDriverDto = SentimentDriver;
@@ -130,7 +134,7 @@ export interface DashboardOverviewDto {
     negative: MetricValueDto;
     neutral: MetricValueDto;
   };
-  trend: SentimentTrendPointDto[];
+  trend: TrendPointDto[];
   topic_distribution: TopicSlice[];
   topic_total: string;
   keyword_cloud: WordCloudWordDto[];
@@ -152,6 +156,8 @@ export interface MentionQuery {
   to?: string;
   page?: number;
   perPage?: number;
+  /** "newest" (default), "oldest", or "engagement". */
+  sort?: string;
 }
 
 export interface MentionListResult {
@@ -184,6 +190,21 @@ export interface MentionListResponseDto {
   platforms: string[];
 }
 
+export interface CommentQuery {
+  page?: number;
+  perPage?: number;
+}
+
+export interface CommentListResult {
+  items: Comment[];
+  pagination: Pagination;
+}
+
+export interface CommentListResponseDto {
+  items: CommentDto[];
+  pagination: PaginationDto;
+}
+
 /* ---------------------------------------------------------------- sentiment */
 
 export interface SentimentQuery {
@@ -192,6 +213,9 @@ export interface SentimentQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
+  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+   * omitted means "All Platforms". */
+  platform?: string;
 }
 
 export interface SentimentOverview {
@@ -212,6 +236,21 @@ export interface SentimentOverview {
   categoryNote: string;
 }
 
+// Shared wire shape for both /dashboard/overview's "Sentiment Trend" chart
+// and /sentiment/overview's "Sentiment Over Time" chart — both support a
+// Percentage/Total toggle client-side, so every point carries both display
+// modes. Needs a real mapper (see mapTrendPoint): the *_count fields become
+// *Count in the app shape.
+export interface TrendPointDto {
+  day: string;
+  positive: number;
+  neutral: number;
+  negative: number;
+  positive_count: number;
+  neutral_count: number;
+  negative_count: number;
+}
+
 export interface SentimentOverviewDto {
   score: number;
   score_max: number;
@@ -223,7 +262,7 @@ export interface SentimentOverviewDto {
     analyzed: MetricValueDto;
   };
   distribution: SentimentDistributionSliceDto[];
-  trend: SentimentTrendPointDto[];
+  trend: TrendPointDto[];
   trend_insights: TrendInsight[];
   by_platform: PlatformDatumDto[];
   by_category: CategorySentimentDto[];
@@ -239,6 +278,9 @@ export interface KeywordQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
+  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+   * omitted means "All Platforms". */
+  platform?: string;
 }
 
 export interface KeywordListResult {

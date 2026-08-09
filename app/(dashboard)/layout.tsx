@@ -6,6 +6,7 @@ import AppShell from "@/components/layout/AppShell";
 import MentionDetailModal from "@/components/mentions/MentionDetailModal";
 import { DateRangeProvider } from "@/context/date-range-context";
 import { MentionProvider } from "@/context/mention-context";
+import { PlatformProvider } from "@/context/platform-context";
 import { useAuth } from "@/context/auth-context";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -28,10 +29,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <DateRangeProvider>
-      <MentionProvider>
-        <AppShell>{children}</AppShell>
-        <MentionDetailModal />
-      </MentionProvider>
+      <PlatformProvider>
+        <MentionProvider>
+          <AppShell>{children}</AppShell>
+          <MentionDetailModal />
+        </MentionProvider>
+      </PlatformProvider>
     </DateRangeProvider>
   );
 }

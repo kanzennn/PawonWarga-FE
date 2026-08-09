@@ -2,10 +2,18 @@ import { apiFetch, ApiError } from "@/lib/api-client";
 import { USE_MOCK_API } from "@/lib/api/config";
 import { endpoints } from "@/lib/api/endpoints";
 import { mockResponse, withQuery } from "@/lib/api/http";
-import { mapMentionList } from "@/lib/api/mappers";
-import { buildMentionList, findMention } from "@/lib/api/mock/mentions.mock";
+import { mapCommentList, mapMentionList } from "@/lib/api/mappers";
+import { buildCommentList, buildMentionList, findMention } from "@/lib/api/mock/mentions.mock";
 import type { Mention } from "@/lib/types";
-import type { MentionDto, MentionListResponseDto, MentionListResult, MentionQuery } from "@/lib/api/types";
+import type {
+  CommentListResponseDto,
+  CommentListResult,
+  CommentQuery,
+  MentionDto,
+  MentionListResponseDto,
+  MentionListResult,
+  MentionQuery,
+} from "@/lib/api/types";
 
 export async function getMentions(
   query: MentionQuery = {},
@@ -22,6 +30,7 @@ export async function getMentions(
           to: query.to,
           page: query.page,
           per_page: query.perPage,
+          sort: query.sort,
         }),
         { token },
       );
@@ -39,4 +48,22 @@ export async function getMention(id: number | string, token?: string): Promise<M
   }
 
   return apiFetch<MentionDto>(endpoints.mentions.detail(id), { token });
+}
+
+export async function getComments(
+  mentionId: number | string,
+  query: CommentQuery = {},
+  token?: string,
+): Promise<CommentListResult> {
+  const dto = USE_MOCK_API
+    ? await mockResponse(() => buildCommentList(query))
+    : await apiFetch<CommentListResponseDto>(
+        withQuery(endpoints.mentions.comments(mentionId), {
+          page: query.page,
+          per_page: query.perPage,
+        }),
+        { token },
+      );
+
+  return mapCommentList(dto);
 }

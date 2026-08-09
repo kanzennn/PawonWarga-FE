@@ -15,6 +15,7 @@ export const endpoints = {
   mentions: {
     list: "/mentions",
     detail: (id: number | string) => `/mentions/${id}`,
+    comments: (id: number | string) => `/mentions/${id}/comments`,
   },
   sentiment: {
     overview: "/sentiment/overview",

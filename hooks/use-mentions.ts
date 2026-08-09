@@ -18,6 +18,7 @@ export function useMentions(query: MentionQuery = {}): ApiQueryState<MentionList
       query.to,
       query.page,
       query.perPage,
+      query.sort,
       token,
     ],
   );

@@ -10,6 +10,6 @@ export function useKeywords(query: KeywordQuery = {}): ApiQueryState<KeywordList
 
   return useApiQuery(
     () => getKeywords(query, token ?? undefined),
-    [query.query, query.sentiment, query.from, query.to, token],
+    [query.query, query.sentiment, query.from, query.to, query.platform, token],
   );
 }

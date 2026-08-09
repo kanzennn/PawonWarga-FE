@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Bell, CalendarDays, ChevronDown, Globe2, LogOut, Search, X } from "lucide-react";
+import { Bell, CalendarDays, ChevronDown, Globe2, LogOut, X } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useDateRange } from "@/context/date-range-context";
+import { PLATFORM_OPTIONS, usePlatform } from "@/context/platform-context";
 import { getInitials } from "@/lib/formatters";
 
 function formatRangeLabel(from: string | null, to: string | null): string {
@@ -25,11 +26,15 @@ function formatRangeLabel(from: string | null, to: string | null): string {
 export default function Topbar() {
   const { user, logout } = useAuth();
   const { range, setRange, clearRange } = useDateRange();
+  const { platform, setPlatform } = usePlatform();
 
   const [open, setOpen] = useState(false);
   const [draftFrom, setDraftFrom] = useState(range.from ?? "");
   const [draftTo, setDraftTo] = useState(range.to ?? "");
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const [platformOpen, setPlatformOpen] = useState(false);
+  const platformPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +48,19 @@ export default function Topbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+  useEffect(() => {
+    if (!platformOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (platformPanelRef.current && !platformPanelRef.current.contains(event.target as Node)) {
+        setPlatformOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [platformOpen]);
 
   const toggleOpen = () => {
     if (!open) {
@@ -64,16 +82,13 @@ export default function Topbar() {
     setOpen(false);
   };
 
+  const selectPlatform = (value: string | null) => {
+    setPlatform(value);
+    setPlatformOpen(false);
+  };
+
   return (
     <header className="mb-6 flex h-auto flex-wrap items-center justify-start gap-3.5 lg:h-[54px] lg:justify-end">
-      <div className="flex h-[46px] w-full items-center gap-2.5 rounded-[14px] border border-[#dce8df] bg-white/90 px-4 text-[#6d7e75] shadow-[0_10px_30px_rgba(8,42,27,0.04)] lg:w-[335px]">
-        <Search size={18} />
-        <input
-          className="w-full border-0 bg-transparent text-[#10231c] outline-none"
-          placeholder="Search keyword, topic, or campaign..."
-        />
-      </div>
-
       <div className="relative">
         <button
           onClick={toggleOpen}
@@ -142,11 +157,43 @@ export default function Topbar() {
         )}
       </div>
 
-      <button className="flex h-[46px] items-center gap-2 rounded-[14px] border border-[#dce8df] bg-white/90 px-3.5 font-extrabold text-[#10231c] shadow-[0_10px_30px_rgba(8,42,27,0.04)]">
-        <Globe2 size={17} />
-        <span>All Platforms</span>
-        <ChevronDown size={15} />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setPlatformOpen((current) => !current)}
+          className="flex h-[46px] items-center gap-2 rounded-[14px] border border-[#dce8df] bg-white/90 px-3.5 font-extrabold text-[#10231c] shadow-[0_10px_30px_rgba(8,42,27,0.04)]"
+        >
+          <Globe2 size={17} />
+          <span>{platform ?? "All Platforms"}</span>
+          <ChevronDown size={15} />
+        </button>
+
+        {platformOpen && (
+          <div
+            ref={platformPanelRef}
+            className="absolute right-0 top-[54px] z-40 w-[220px] rounded-[16px] border border-[#dce8df] bg-white p-2 shadow-[0_18px_44px_rgba(8,42,27,0.14)]"
+          >
+            <button
+              onClick={() => selectPlatform(null)}
+              className={`flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-bold hover:bg-[#f3f8ee] ${
+                platform === null ? "bg-[#eef7ea] text-[#07513b]" : "text-[#10231c]"
+              }`}
+            >
+              All Platforms
+            </button>
+            {PLATFORM_OPTIONS.map((name) => (
+              <button
+                key={name}
+                onClick={() => selectPlatform(name)}
+                className={`flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-bold hover:bg-[#f3f8ee] ${
+                  platform === name ? "bg-[#eef7ea] text-[#07513b]" : "text-[#10231c]"
+                }`}
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <button className="relative flex h-[46px] w-[46px] items-center justify-center rounded-[14px] border border-[#dce8df] bg-white/90 text-[#063b2d] shadow-[0_10px_30px_rgba(8,42,27,0.04)]">
         <Bell size={19} />

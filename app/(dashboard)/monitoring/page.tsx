@@ -1,24 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Filter, MessageCircle, Radio, Search, UsersRound } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Filter, MessageCircle, Radio, Search, UsersRound } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import { ErrorState, LoadingState } from "@/components/ui/DataState";
 import { useDateRange } from "@/context/date-range-context";
 import { useMention } from "@/context/mention-context";
+import { usePlatform } from "@/context/platform-context";
 import { useMentions } from "@/hooks/use-mentions";
 import { USE_MOCK_API } from "@/lib/api/config";
 import { formatStatCount, platformMeta } from "@/lib/business-logic";
 import type { MentionListResult, MentionQuery } from "@/lib/api/types";
 
-type MonitoringFilters = Required<Pick<MentionQuery, "query" | "platform" | "sentiment">>;
+type MonitoringFilters = Required<Pick<MentionQuery, "query" | "sentiment" | "sort">>;
 
 const INITIAL_FILTERS: MonitoringFilters = {
   query: "",
-  platform: "All Platforms",
   sentiment: "All Sentiments",
+  sort: "newest",
 };
 
 export default function SocialMonitoringPage() {
@@ -26,12 +27,13 @@ export default function SocialMonitoringPage() {
   const [filters, setFilters] = useState<MonitoringFilters>(INITIAL_FILTERS);
   const [page, setPage] = useState(1);
   const { range } = useDateRange();
+  const { platform } = usePlatform();
 
-  // Any filter or date-range change invalidates the current page — jump
-  // back to page 1 rather than risk landing past the end of a shorter
-  // result set. Adjusted during render (not an effect) per
+  // Any filter, platform, or date-range change invalidates the current
+  // page — jump back to page 1 rather than risk landing past the end of a
+  // shorter result set. Adjusted during render (not an effect) per
   // https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes.
-  const filterKey = `${filters.query}|${filters.platform}|${filters.sentiment}|${range.from ?? ""}|${range.to ?? ""}`;
+  const filterKey = `${filters.query}|${platform ?? ""}|${filters.sentiment}|${filters.sort}|${range.from ?? ""}|${range.to ?? ""}`;
   const [lastFilterKey, setLastFilterKey] = useState(filterKey);
   let effectivePage = page;
   if (filterKey !== lastFilterKey) {
@@ -42,6 +44,7 @@ export default function SocialMonitoringPage() {
 
   const { data, isLoading, error, refetch } = useMentions({
     ...filters,
+    platform: platform ?? undefined,
     from: range.from ?? undefined,
     to: range.to ?? undefined,
     page: effectivePage,
@@ -102,7 +105,7 @@ function MonitoringContent({
   onPageChange,
 }: MonitoringContentProps) {
   const { selectMention } = useMention();
-  const { items: filteredMentions, metrics, platformVolume, platforms, pagination } = data;
+  const { items: filteredMentions, metrics, platformVolume, pagination } = data;
 
   const rangeStart = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.perPage + 1;
   const rangeEnd = Math.min(pagination.page * pagination.perPage, pagination.total);
@@ -149,7 +152,7 @@ function MonitoringContent({
 
       <Card className="mb-5 p-5">
         <form
-          className="grid gap-3 lg:grid-cols-[minmax(260px,1fr)_180px_180px_150px]"
+          className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_160px_170px_150px]"
           onSubmit={onApply}
         >
           <label className="flex h-12 items-center gap-3 rounded-2xl border border-[#dce8df] bg-white px-4 text-[#6d7e75]">
@@ -162,18 +165,6 @@ function MonitoringContent({
             />
           </label>
           <select
-            value={draftFilters.platform}
-            onChange={(event) => onDraftChange("platform", event.target.value)}
-            className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
-          >
-            <option value="All Platforms">All Platforms</option>
-            {platforms.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <select
             value={draftFilters.sentiment}
             onChange={(event) => onDraftChange("sentiment", event.target.value)}
             className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
@@ -182,6 +173,16 @@ function MonitoringContent({
             <option value="positive">Positive</option>
             <option value="negative">Negative</option>
             <option value="neutral">Neutral</option>
+          </select>
+          <select
+            value={draftFilters.sort}
+            onChange={(event) => onDraftChange("sort", event.target.value)}
+            className="h-12 rounded-2xl border border-[#dce8df] bg-white px-4 font-bold text-[#10231c] outline-none"
+            aria-label="Sort by"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="engagement">Most Engagement</option>
           </select>
           <button
             type="submit"
@@ -227,11 +228,18 @@ function MonitoringContent({
                       : "ring-[#ffe6a8]";
 
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => selectMention(item)}
-                    className="group grid w-full gap-4 rounded-2xl border border-[#dce8df] bg-[#fbfdf8] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#cfe4d4] hover:bg-white hover:shadow-[0_14px_35px_rgba(11,68,45,0.08)] md:grid-cols-[48px_minmax(0,1fr)_132px]"
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        selectMention(item);
+                      }
+                    }}
+                    className="group grid w-full cursor-pointer gap-4 rounded-2xl border border-[#dce8df] bg-[#fbfdf8] p-4 text-left transition hover:-translate-y-0.5 hover:border-[#cfe4d4] hover:bg-white hover:shadow-[0_14px_35px_rgba(11,68,45,0.08)] md:grid-cols-[48px_minmax(0,1fr)_132px]"
                   >
                     <div className="flex items-start gap-3 md:block">
                       <span
@@ -282,8 +290,22 @@ function MonitoringContent({
                       <div className="rounded-full bg-[#f0f6ed] px-3 py-1.5 text-xs font-black text-[#10231c]">
                         {item.engagement || "12.4K"}
                       </div>
+
+                      {item.url && (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(event) => event.stopPropagation()}
+                          className="flex items-center gap-1 text-xs font-black text-[#07513b] hover:underline"
+                          aria-label={`Buka postingan asli di ${item.platform}`}
+                        >
+                          <ExternalLink size={13} />
+                          Lihat postingan
+                        </a>
+                      )}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
 

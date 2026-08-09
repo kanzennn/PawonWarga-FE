@@ -6,7 +6,7 @@ import {
 } from "@/lib/business-logic";
 import { mentions, platformData } from "@/lib/data/dummy-data";
 import { toPlatformDatumDto } from "@/lib/api/mock/to-dto";
-import type { MentionListResponseDto, MentionQuery } from "@/lib/api/types";
+import type { CommentListResponseDto, CommentQuery, MentionListResponseDto, MentionQuery } from "@/lib/api/types";
 
 export function buildMentionList(query: MentionQuery = {}): MentionListResponseDto {
   const filtered = filterMentions(mentions, {
@@ -47,4 +47,13 @@ export function buildMentionList(query: MentionQuery = {}): MentionListResponseD
 
 export function findMention(id: number | string) {
   return mentions.find((item) => String(item.id) === String(id)) ?? null;
+}
+
+// No dummy comment dataset exists yet — mock mode reports "no comments"
+// rather than fabricating data, same spirit as this file's other stubs.
+export function buildCommentList(query: CommentQuery = {}): CommentListResponseDto {
+  return {
+    items: [],
+    pagination: { page: query.page ?? 1, per_page: query.perPage ?? DEFAULT_PAGE_SIZE, total: 0, total_pages: 1 },
+  };
 }

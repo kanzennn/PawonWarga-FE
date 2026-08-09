@@ -18,6 +18,7 @@ export async function getKeywords(
           sentiment: query.sentiment,
           from: query.from,
           to: query.to,
+          platform: query.platform,
         }),
         { token },
       );

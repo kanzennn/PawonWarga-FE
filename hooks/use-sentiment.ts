@@ -13,7 +13,7 @@ export function useSentimentOverview(
 
   return useApiQuery(
     () => getSentimentOverview(query, token ?? undefined),
-    [query.range, query.from, query.to, token],
+    [query.range, query.from, query.to, query.platform, token],
   );
 }
 

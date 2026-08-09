@@ -23,6 +23,7 @@ export async function getSentimentOverview(
           range: query.range,
           from: query.from,
           to: query.to,
+          platform: query.platform,
         }),
         { token },
       );

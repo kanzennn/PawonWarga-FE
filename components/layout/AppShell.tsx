@@ -22,7 +22,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
       />
 
       <main className="min-w-0 bg-[radial-gradient(circle_at_45%_20%,rgba(165,231,137,0.16),transparent_28%),#f6faf5] px-5 py-5 md:px-8 md:py-7">
-        <Topbar />
+        <div className="sticky top-0 z-30 -mx-5 -mt-5 bg-[#f6faf5]/85 px-5 pt-5 backdrop-blur-md md:-mx-8 md:-mt-7 md:px-8 md:pt-7">
+          <Topbar />
+        </div>
         {children}
       </main>
     </div>

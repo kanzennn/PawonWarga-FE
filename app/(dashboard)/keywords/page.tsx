@@ -44,12 +44,12 @@ export default function KeywordSentimentPage() {
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">
-      <PageHeading title="Keyword Sentiment" subtitle="Lihat kata kunci yang paling memengaruhi sentimen publik tentang MBG." />
+      <PageHeading title="Keyword Sentiment" subtitle="See which keywords most influence public sentiment about MBG." />
 
       {isLoading ? (
-        <LoadingState message="Memuat keyword..." />
+        <LoadingState message="Loading keywords..." />
       ) : !data ? (
-        <ErrorState message={error ?? "Data keyword tidak tersedia."} onRetry={refetch} />
+        <ErrorState message={error ?? "Keyword data unavailable."} onRetry={refetch} />
       ) : (
         <KeywordContent data={data} filters={filters} onFilterChange={updateFilter} />
       )}
@@ -109,7 +109,7 @@ function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) 
           {items.length ? (
             <WordCloud words={items} />
           ) : (
-            <EmptyState message="Tidak ada keyword yang cocok dengan filter." />
+            <EmptyState message="No keywords match the filter." />
           )}
         </Card>
 
@@ -126,7 +126,7 @@ function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) 
               </div>
             ))}
             {!items.length && (
-              <EmptyState message="Ranking kosong untuk kombinasi filter ini." />
+              <EmptyState message="No ranking for this filter combination." />
             )}
           </div>
         </Card>
@@ -145,7 +145,7 @@ function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) 
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <EmptyState message="Tidak ada volume keyword untuk ditampilkan." />
+            <EmptyState message="No keyword volume to display." />
           )}
         </Card>
 
@@ -158,7 +158,7 @@ function KeywordContent({ data, filters, onFilterChange }: KeywordContentProps) 
               </div>
             ))}
             {!alerts.length && (
-              <EmptyState message="Tidak ada alert keyword dari hasil filter saat ini." />
+              <EmptyState message="No keyword alerts from the current filter." />
             )}
           </div>
         </Card>
@@ -172,7 +172,7 @@ function EmptyState({ message }: { message: string }) {
     <div className="rounded-2xl border border-dashed border-[#cbdccd] bg-[#fbfdf8] p-6 text-center">
       <b className="text-[#10231c]">{message}</b>
       <p className="m-0 mt-2 text-sm leading-6 text-[#6d7e75]">
-        Coba ubah kata kunci atau pilihan sentimen.
+        Try adjusting the keyword or sentiment filter.
       </p>
     </div>
   );

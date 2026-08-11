@@ -10,6 +10,11 @@ import type { Mention } from "@/lib/types";
 
 const COMMENTS_PER_PAGE = 10;
 
+// Shown in place of "" fields the source platform's scraper never captured
+// (e.g. view/share counts aren't exposed by every platform) — see Mention's
+// field-level doc comments in lib/types.ts.
+const NOT_AVAILABLE = "Not available";
+
 export default function MentionDetailModal() {
   const { selectedMention, clearMention } = useMention();
 
@@ -41,11 +46,12 @@ function MentionDetailContent({ mention }: { mention: Mention }) {
       </div>
       <div className="grid gap-3 rounded-2xl bg-[#f6faf5] p-4 sm:grid-cols-2">
         <Info label="Platform" value={mention.platform} />
-        <Info label="Location" value={mention.location || "-"} />
+        <Info label="Location" value={mention.location || NOT_AVAILABLE} />
         <Info label="Engagement" value={mention.engagement} />
         <Info label="Time" value={mention.time} />
-        <Info label="Category" value={mention.category || "-"} />
-        <Info label="Risk Level" value={mention.risk || "-"} />
+        <Info label="View" value={mention.view || NOT_AVAILABLE} />
+        <Info label="Like" value={mention.like || NOT_AVAILABLE} />
+        <Info label="Share" value={mention.share || NOT_AVAILABLE} />
       </div>
       {mention.url && (
         <a
@@ -55,7 +61,7 @@ function MentionDetailContent({ mention }: { mention: Mention }) {
           className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#052d22] text-sm font-black text-white hover:bg-[#07513b]"
         >
           <ExternalLink size={16} />
-          Lihat postingan asli
+          View original post
         </a>
       )}
 
@@ -66,7 +72,7 @@ function MentionDetailContent({ mention }: { mention: Mention }) {
 
         <div className="mt-3 grid gap-3">
           {isLoading && !comments && (
-            <p className="m-0 text-sm text-[#6d7e75]">Memuat komentar...</p>
+            <p className="m-0 text-sm text-[#6d7e75]">Loading comments...</p>
           )}
 
           {comments?.items.map((comment) => (
@@ -83,7 +89,7 @@ function MentionDetailContent({ mention }: { mention: Mention }) {
           ))}
 
           {comments && comments.items.length === 0 && (
-            <p className="m-0 text-sm text-[#6d7e75]">Belum ada komentar untuk postingan ini.</p>
+            <p className="m-0 text-sm text-[#6d7e75]">No comments yet for this post.</p>
           )}
         </div>
 

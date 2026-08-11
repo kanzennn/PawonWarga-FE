@@ -2,12 +2,7 @@ import { apiFetch } from "@/lib/api-client";
 import { USE_MOCK_API } from "@/lib/api/config";
 import { endpoints } from "@/lib/api/endpoints";
 import { mockResponse } from "@/lib/api/http";
-import {
-  applyPreference,
-  buildIntegrations,
-  buildPreferences,
-  toggleIntegrationStatus,
-} from "@/lib/api/mock/settings.mock";
+import { applyPreference, buildIntegrations, buildPreferences } from "@/lib/api/mock/settings.mock";
 import type { MonitoringPreference, SettingsIntegration } from "@/lib/types";
 import type {
   MonitoringPreferenceDto,
@@ -16,26 +11,15 @@ import type {
   UpdatePreferenceRequestDto,
 } from "@/lib/api/types";
 
+// Integration status is read-only — reported automatically from ingested
+// data (and later, Argus crawler health), never set by the user. See
+// pawonwarga-fe/docs/api-contract.md.
 export async function getIntegrations(token?: string): Promise<SettingsIntegration[]> {
   if (USE_MOCK_API) {
     return mockResponse(buildIntegrations);
   }
 
   return apiFetch<SettingsIntegrationDto[]>(endpoints.settings.integrations, { token });
-}
-
-export async function toggleIntegration(
-  name: string,
-  token?: string,
-): Promise<SettingsIntegration[]> {
-  if (USE_MOCK_API) {
-    return mockResponse(() => toggleIntegrationStatus(name));
-  }
-
-  return apiFetch<SettingsIntegrationDto[]>(endpoints.settings.integration(name), {
-    method: "PATCH",
-    token,
-  });
 }
 
 export async function getPreferences(token?: string): Promise<MonitoringPreference[]> {

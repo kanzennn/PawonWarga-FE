@@ -70,9 +70,9 @@ export default function SocialMonitoringPage() {
       />
 
       {isLoading ? (
-        <LoadingState message="Memuat percakapan publik..." />
+        <LoadingState message="Loading public conversations..." />
       ) : !data ? (
-        <ErrorState message={error ?? "Data mention tidak tersedia."} onRetry={refetch} />
+        <ErrorState message={error ?? "Mention data unavailable."} onRetry={refetch} />
       ) : (
         <MonitoringContent
           data={data}
@@ -193,7 +193,7 @@ function MonitoringContent({
         </form>
       </Card>
 
-      <div className="grid gap-5 2xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-5 2xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card title="Live Social Mentions" className="p-6">
           <div className="grid gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#dce8df] bg-[#f8fbf5] px-4 py-3">
@@ -298,10 +298,10 @@ function MonitoringContent({
                           rel="noopener noreferrer"
                           onClick={(event) => event.stopPropagation()}
                           className="flex items-center gap-1 text-xs font-black text-[#07513b] hover:underline"
-                          aria-label={`Buka postingan asli di ${item.platform}`}
+                          aria-label={`Open original post on ${item.platform}`}
                         >
                           <ExternalLink size={13} />
-                          Lihat postingan
+                          View post
                         </a>
                       )}
                     </div>
@@ -311,9 +311,9 @@ function MonitoringContent({
 
               {!filteredMentions.length && (
                 <div className="rounded-2xl border border-dashed border-[#cbdccd] bg-[#fbfdf8] p-6 text-center">
-                  <b className="text-[#10231c]">Tidak ada mention yang cocok.</b>
+                  <b className="text-[#10231c]">No matching mentions.</b>
                   <p className="m-0 mt-2 text-sm leading-6 text-[#6d7e75]">
-                    Ubah keyword, platform, atau sentimen untuk melihat percakapan lain.
+                    Adjust the keyword, platform, or sentiment filters to see other conversations.
                   </p>
                 </div>
               )}

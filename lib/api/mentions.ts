@@ -42,7 +42,7 @@ export async function getMention(id: number | string, token?: string): Promise<M
   if (USE_MOCK_API) {
     const mention = await mockResponse(() => findMention(id));
     if (!mention) {
-      throw new ApiError(`Mention ${id} tidak ditemukan.`, 404);
+      throw new ApiError(`Mention ${id} not found.`, 404);
     }
     return mention;
   }

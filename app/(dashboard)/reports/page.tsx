@@ -31,12 +31,12 @@ export default function ReportsPage() {
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">
-      <PageHeading title="Reports" subtitle="Buat, jadwalkan, dan kelola laporan analisis sentimen MBG." />
+      <PageHeading title="Reports" subtitle="Create, schedule, and manage MBG sentiment analysis reports." />
 
       {isLoading ? (
-        <LoadingState message="Memuat laporan..." />
+        <LoadingState message="Loading reports..." />
       ) : !reportData || !templates?.length ? (
-        <ErrorState message={error ?? "Data laporan tidak tersedia."} onRetry={retry} />
+        <ErrorState message={error ?? "Report data unavailable."} onRetry={retry} />
       ) : (
         <ReportsContent reportData={reportData} templates={templates} />
       )}
@@ -280,7 +280,7 @@ function ReportsContent({ reportData, templates }: ReportsContentProps) {
 
       <Card title="Report Document Template" className="mt-5 p-7">
         {!document ? (
-          <LoadingState message="Menyiapkan dokumen laporan..." />
+          <LoadingState message="Preparing report document..." />
         ) : (
           <div className="overflow-hidden rounded-[24px] border border-[#dce8df] bg-white">
             <div className="bg-[radial-gradient(circle_at_90%_20%,rgba(185,251,125,0.2),transparent_32%),linear-gradient(135deg,#04392b,#05281f)] p-7 text-white">

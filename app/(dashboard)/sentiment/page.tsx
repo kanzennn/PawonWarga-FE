@@ -46,13 +46,13 @@ export default function SentimentAnalysisPage() {
     <div className="min-w-0 pb-24 lg:pb-0">
       <PageHeading
         title="Sentiment Analysis"
-        subtitle="Analisis detail sentimen positif, negatif, dan netral terhadap program MBG."
+        subtitle="Detailed breakdown of positive, negative, and neutral sentiment toward the MBG program."
       />
 
       {isLoading ? (
-        <LoadingState message="Memuat analisis sentimen..." />
+        <LoadingState message="Loading sentiment analysis..." />
       ) : !data ? (
-        <ErrorState message={error ?? "Data sentimen tidak tersedia."} onRetry={refetch} />
+        <ErrorState message={error ?? "Sentiment data unavailable."} onRetry={refetch} />
       ) : (
         <SentimentContent overview={data} />
       )}

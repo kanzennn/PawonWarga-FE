@@ -13,7 +13,7 @@ export interface ApiQueryState<T> {
   refetch: () => void;
 }
 
-export const GENERIC_QUERY_ERROR = "Gagal memuat data dari server.";
+export const GENERIC_QUERY_ERROR = "Failed to load data from the server.";
 
 interface Snapshot<T> {
   /** Which request produced this snapshot; null before the first response. */

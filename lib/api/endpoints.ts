@@ -36,7 +36,6 @@ export const endpoints = {
   },
   settings: {
     integrations: "/settings/integrations",
-    integration: (id: string) => `/settings/integrations/${encodeURIComponent(id)}`,
     preferences: "/settings/preferences",
   },
 } as const;

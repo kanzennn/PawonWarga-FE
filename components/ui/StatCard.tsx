@@ -49,11 +49,11 @@ export default function StatCard({
   const style = toneClasses[tone] || toneClasses.positive;
 
   return (
-    <div className="rounded-[18px] border border-[#dce8df] bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,68,45,0.06)]">
+    <div className="group rounded-[18px] border border-[#dce8df] bg-white/95 p-4 shadow-[0_12px_30px_rgba(11,68,45,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(11,68,45,0.1)]">
       <div className="mb-3 flex items-start justify-between gap-4">
         <div
           className={[
-            "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
+            "grid h-10 w-10 shrink-0 place-items-center rounded-xl transition-transform duration-300 group-hover:scale-105",
             style.icon,
           ].join(" ")}
         >

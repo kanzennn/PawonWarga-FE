@@ -58,7 +58,7 @@ Backs `/dashboard`. Query: `range` (optional, e.g. `this_month`).
   "data_sources": [
     { "code": "X", "label": "X / Twitter", "value": "45.2K", "active": true }
   ],
-  "last_updated": "15 menit yang lalu"
+  "last_updated": "15 minutes ago"
 }
 ```
 
@@ -88,6 +88,9 @@ Backs `/monitoring`. Query: `q`, `platform`, `sentiment`, `page`, `per_page`.
       "text": "Program MBG membantu anak sekolah...",
       "sentiment": "positive",
       "engagement": "12.4K",
+      "view": "48.2K",
+      "like": "12.4K",
+      "share": "",
       "time": "10:24",
       "location": "Jawa Barat",
       "category": "Nutrition",
@@ -113,6 +116,8 @@ Notes:
 - `metrics` and `platform_volume` must aggregate the **whole filtered set**, not just the
   current page — the stat cards would be wrong otherwise.
 - `risk` is `"Low" | "Medium" | "High"`.
+- `view`/`like`/`share` are `""` (not `"0"`) when that platform's scraper never captured the
+  counter — Mention Detail renders `""` as "Not available" rather than a misleading 0.
 - `mention_count` is `null` when no filter narrowed the set.
 - `total_unfiltered` feeds the "Showing X of Y" label.
 
@@ -307,14 +312,11 @@ browser by `lib/pdf-export.ts`. Expected to return the binary with the right
 [{ "name": "X / Twitter", "status": "Operational", "count": "45.2K mentions" }]
 ```
 
-`status` is `"Operational" | "Not Operational"`.
-
-## PATCH /settings/integrations/{name}
-
-Flips one integration. Returns the **full updated list** (same shape as the GET) so the page
-can replace its state in one go. The name is URL-encoded — `X / Twitter` arrives as
-`X%20%2F%20Twitter`. Switch to a stable slug/id if that is awkward on the Go side; only
-`endpoints.settings.integration()` and the page's `toggleIntegration` would change.
+`status` is `"Operational" | "Not Operational"` and is **read-only** — reported automatically
+(PawonWarga-BE currently infers it from whether any data has been ingested for that platform,
+the same signal the dashboard's Data Sources widget uses; the eventual source of truth is
+Argus's crawler health). There is no PATCH/toggle endpoint and the Data Integrations page
+renders `status` as a plain badge, not a button.
 
 ## GET /settings/preferences
 

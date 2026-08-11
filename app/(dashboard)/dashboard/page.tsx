@@ -26,7 +26,7 @@ import Badge from "@/components/ui/Badge";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
 import WordCloud from "@/components/ui/WordCloud";
-import { ErrorState, LoadingState } from "@/components/ui/DataState";
+import { ErrorState, SkeletonBlock } from "@/components/ui/DataState";
 import { ModeToggle } from "@/components/ui/ModeToggle";
 import { useDateRange } from "@/context/date-range-context";
 import { useMention } from "@/context/mention-context";
@@ -65,9 +65,9 @@ export default function DashboardPage() {
       </div>
 
       {isLoading ? (
-        <LoadingState message="Memuat ringkasan dashboard..." />
+        <DashboardSkeleton />
       ) : !data ? (
-        <ErrorState message={error ?? "Data dashboard tidak tersedia."} onRetry={refetch} />
+        <ErrorState message={error ?? "Dashboard data unavailable."} onRetry={refetch} />
       ) : (
         <DashboardContent overview={data} onRefresh={refetch} />
       )}
@@ -111,7 +111,7 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
     <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_320px]">
       <main className="grid min-w-0 gap-4">
         <div className="grid min-w-0 gap-4">
-          <div className="relative min-h-[150px] overflow-hidden rounded-[18px] border border-[#dce8df] bg-[radial-gradient(circle_at_84%_76%,rgba(123,214,88,0.24),transparent_34%),linear-gradient(135deg,#04392b,#05281f)] p-5 text-white shadow-[0_14px_36px_rgba(11,68,45,0.08)]">
+          <div className="animate-fade-up relative min-h-[150px] overflow-hidden rounded-[18px] border border-[#dce8df] bg-[radial-gradient(circle_at_84%_76%,rgba(123,214,88,0.24),transparent_34%),linear-gradient(135deg,#04392b,#05281f)] p-5 text-white shadow-[0_14px_36px_rgba(11,68,45,0.08)]">
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
               <h3 className="m-0 text-[15px] font-black">
                 Public Sentiment Overview
@@ -131,7 +131,10 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div className="grid min-w-0 gap-4">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div
+                className="animate-fade-up grid grid-cols-1 gap-4 md:grid-cols-2"
+                style={{ animationDelay: "80ms" }}
+              >
                 <StatCard
                   icon={MessageCircle}
                   label="Total Mentions"
@@ -165,14 +168,9 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
               <Card
                 title="Sentiment Trend"
-                className="p-5"
+                className="animate-fade-up p-5 [animation-delay:140ms]"
                 action={
-                  <div className="flex items-center gap-2">
-                    <ModeToggle value={trendMode} onChange={setTrendMode} />
-                    <button className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#dce8df] bg-white px-4 text-sm font-extrabold text-[#10231c] shadow-sm">
-                      This Month
-                    </button>
-                  </div>
+                  <ModeToggle value={trendMode} onChange={setTrendMode} />
                 }
               >
                 <div className="mb-4 mt-1 flex flex-wrap gap-x-6 gap-y-2 text-sm font-extrabold">
@@ -259,7 +257,10 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
               </Card>
             </div>
 
-            <Card title="Topic Distribution" className="p-5">
+            <Card
+              title="Topic Distribution"
+              className="animate-fade-up p-5 [animation-delay:200ms]"
+            >
               <div className="flex h-full flex-col gap-4">
                 <p className="m-0 text-sm font-bold leading-relaxed text-[#6d7e75]">
                   Distribution of the most discussed MBG sentiment categories
@@ -349,9 +350,9 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
         <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
           <Card
             title="Top Keywords"
-            className="p-5"
+            className="animate-fade-up p-5 [animation-delay:260ms]"
             action={
-              <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]">
+              <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c] transition-all duration-200 hover:border-[#07513b]/40 hover:bg-[#f4f8f2] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#07513b] focus-visible:ring-offset-2">
                 View All
               </button>
             }
@@ -361,11 +362,11 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
           <Card
             title="Recent Conversations"
-            className="p-5"
+            className="animate-fade-up p-5 [animation-delay:300ms]"
             action={
               <Link
                 href="/monitoring"
-                className="inline-flex h-9 items-center rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]"
+                className="inline-flex h-9 items-center rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c] transition-all duration-200 hover:border-[#07513b]/40 hover:bg-[#f4f8f2] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#07513b] focus-visible:ring-offset-2"
               >
                 View All
               </Link>
@@ -384,7 +385,7 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
               {recentMentions.map((item) => (
                 <button
                   key={item.id}
-                  className="group grid min-w-[760px] w-full grid-cols-[70px_130px_minmax(250px,1fr)_110px_100px_70px] items-center gap-3 border-0 border-b border-[#dce8df] bg-transparent px-3.5 py-3.5 text-left transition-colors hover:bg-[#fbfdf8]"
+                  className="group grid min-w-[760px] w-full grid-cols-[70px_130px_minmax(250px,1fr)_110px_100px_70px] items-center gap-3 border-0 border-b border-[#dce8df] bg-transparent px-3.5 py-3.5 text-left transition-colors hover:bg-[#fbfdf8] active:bg-[#f4f8f2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#07513b]"
                   onClick={() => selectMention(item)}
                 >
                   <span className="sticky left-3.5 z-10 grid h-8 w-8 place-items-center rounded-full bg-[#061a16] font-black text-white">
@@ -411,9 +412,9 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
       <aside className="grid self-start gap-4 xl:grid-cols-2 2xl:grid-cols-1">
         <Card
           title="Top Sentiment Drivers"
-          className="p-5"
+          className="animate-fade-up p-5 [animation-delay:180ms]"
           action={
-            <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]">
+            <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c] transition-all duration-200 hover:border-[#07513b]/40 hover:bg-[#f4f8f2] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#07513b] focus-visible:ring-offset-2">
               View All
             </button>
           }
@@ -475,9 +476,9 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
         <Card
           title="Data Sources"
-          className="p-5"
+          className="animate-fade-up p-5 [animation-delay:220ms]"
           action={
-            <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c]">
+            <button className="h-9 rounded-xl border border-[#dce8df] bg-white px-3.5 text-sm font-extrabold text-[#10231c] transition-all duration-200 hover:border-[#07513b]/40 hover:bg-[#f4f8f2] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#07513b] focus-visible:ring-offset-2">
               View All
             </button>
           }
@@ -537,14 +538,45 @@ function DashboardContent({ overview, onRefresh }: DashboardContentProps) {
 
               <button
                 onClick={onRefresh}
-                className="grid h-9 w-9 place-items-center rounded-xl border border-[#dce8df] bg-white text-[#07513b]"
+                aria-label="Refresh dashboard"
+                className="group grid h-9 w-9 place-items-center rounded-xl border border-[#dce8df] bg-white text-[#07513b] transition-all duration-200 hover:border-[#07513b]/40 hover:bg-[#f4f8f2] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#07513b] focus-visible:ring-offset-2"
               >
-                <RefreshCcw size={15} />
+                <RefreshCcw
+                  size={15}
+                  className="transition-transform duration-300 group-hover:rotate-90"
+                />
               </button>
             </div>
           </div>
         </Card>
       </aside>
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div aria-live="polite" aria-busy="true" className="grid gap-4">
+      <span className="sr-only">Loading dashboard overview...</span>
+
+      <SkeletonBlock className="h-[150px] rounded-[18px]" />
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid min-w-0 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <SkeletonBlock key={i} className="h-[128px] rounded-[18px]" />
+            ))}
+          </div>
+          <SkeletonBlock className="h-[380px] rounded-[18px]" />
+        </div>
+        <SkeletonBlock className="h-[420px] rounded-[18px]" />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[300px_minmax(0,1fr)]">
+        <SkeletonBlock className="h-[280px] rounded-[18px]" />
+        <SkeletonBlock className="h-[280px] rounded-[18px]" />
+      </div>
     </div>
   );
 }
@@ -612,7 +644,7 @@ function DonutTooltip({
         <p className="m-0 text-sm font-black text-[#10231c]">{item.name}</p>
       </div>
       <p className="m-0 mt-1 text-sm font-bold text-[#6d7e75]">
-        {item.value}% dari total percakapan
+        {item.value}% of total conversations
       </p>
     </div>
   );

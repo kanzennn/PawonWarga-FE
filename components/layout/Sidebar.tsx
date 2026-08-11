@@ -1,14 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import {
   Bot,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   FileText,
   Grid2X2,
-  LockKeyhole,
+  LogOut,
   MessageSquareText,
   Search,
   Settings,
@@ -16,6 +19,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import LogoMark from "@/components/ui/LogoMark";
+import { useAuth } from "@/context/auth-context";
+import { getInitials } from "@/lib/formatters";
 
 interface MenuItem {
   href: string;
@@ -30,7 +35,6 @@ const menus: MenuItem[] = [
   { href: "/keywords", label: "Keyword Sentiment", icon: Search },
   // { href: "/ai", label: "AI Summary", icon: Bot },
   { href: "/reports", label: "Reports", icon: FileText },
-  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 interface SidebarProps {
@@ -43,11 +47,29 @@ export default function Sidebar({
   onToggleCollapse,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
 
   return (
     <aside
       className={[
-        "fixed inset-x-0 bottom-0 z-40 flex h-[72px] items-center gap-2 overflow-x-auto bg-[#0d321e] px-3 text-white lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:items-stretch lg:overflow-hidden lg:bg-[radial-gradient(circle_at_72%_34%,rgba(151,221,85,0.24),transparent_30%),linear-gradient(180deg,#0d321e,#102c1a_68%,#092014)] lg:transition-all lg:duration-300",
+        "fixed inset-x-0 bottom-0 z-40 flex h-[72px] items-center gap-2 overflow-x-auto bg-[#0d321e] px-3 text-white lg:sticky lg:top-0 lg:h-screen lg:flex-col lg:items-stretch lg:bg-[radial-gradient(circle_at_72%_34%,rgba(151,221,85,0.24),transparent_30%),linear-gradient(180deg,#0d321e,#102c1a_68%,#092014)] lg:transition-all lg:duration-300",
+        profileOpen ? "lg:overflow-visible" : "lg:overflow-hidden",
         isCollapsed
           ? "lg:w-[88px] lg:px-3.5 lg:py-5"
           : "lg:w-[300px] lg:px-4 lg:py-6",
@@ -126,30 +148,98 @@ export default function Sidebar({
         })}
       </nav>
 
-      {!isCollapsed && (
-        <div className="mt-auto hidden rounded-[18px] border border-[#ddffc2]/40 bg-white/5 p-5 lg:block">
-          <div className="text-[#f4b21b]">♛</div>
-          <h3 className="my-2 mb-4 text-[15px] leading-relaxed">
-            Unlock deeper public insight with AI-generated reports
-          </h3>
-          <button
-            type="button"
-            className="h-11 w-full rounded-xl border-0 bg-gradient-to-b from-[#ffc83d] to-[#f3ae16] font-black text-[#122316]"
+      <div ref={profileRef} className="relative mt-auto hidden lg:block">
+        {profileOpen && (
+          <div
+            className={[
+              "absolute bottom-[calc(100%+10px)] z-50 w-[260px] overflow-hidden rounded-[16px] border border-[#dce8df] bg-white p-1.5 text-[#10231c] shadow-[0_20px_46px_rgba(8,42,27,0.22)]",
+              isCollapsed ? "left-0" : "left-0 right-0 w-auto",
+            ].join(" ")}
           >
-            Upgrade Plan
-          </button>
-        </div>
-      )}
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e4f8d6] text-xs font-black text-[#07513b]">
+                {user?.profile_picture ? (
+                  <Image
+                    src={user.profile_picture}
+                    alt={user.name}
+                    width={40}
+                    height={40}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  getInitials(user?.name || "?")
+                )}
+              </div>
+              <div className="min-w-0">
+                <b className="block truncate text-sm">{user?.name ?? "Analyst"}</b>
+                <small className="block truncate text-xs text-[#6d7e75]">
+                  {user?.email ?? "Admin"}
+                </small>
+              </div>
+            </div>
 
-      {isCollapsed && (
+            <div className="my-1 h-px bg-[#eef2ef]" />
+
+            <Link
+              href="/settings"
+              onClick={() => setProfileOpen(false)}
+              className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-[#10231c] transition hover:bg-[#f3f8ee]"
+            >
+              <Settings size={16} />
+              Settings
+            </Link>
+
+            <button
+              type="button"
+              onClick={logout}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-bold text-[#d63838] transition hover:bg-[#fff2f2]"
+            >
+              <LogOut size={16} />
+              Log out
+            </button>
+          </div>
+        )}
+
         <button
           type="button"
-          title="Lock"
-          className="mt-auto hidden h-[52px] w-[52px] place-items-center rounded-2xl border-0 bg-[#d9ffc2] text-[#052d22] lg:grid"
+          onClick={() => setProfileOpen((current) => !current)}
+          aria-haspopup="menu"
+          aria-expanded={profileOpen}
+          className={[
+            "flex w-full items-center gap-2.5 rounded-[18px] border border-[#ddffc2]/20 bg-white/5 p-3 transition hover:bg-white/10",
+            isCollapsed ? "justify-center" : "",
+          ].join(" ")}
         >
-          <LockKeyhole size={18} />
+          <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[#e4f8d6] text-xs font-black text-[#07513b]">
+            {user?.profile_picture ? (
+              <Image
+                src={user.profile_picture}
+                alt={user.name}
+                width={44}
+                height={44}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              getInitials(user?.name || "?")
+            )}
+          </div>
+
+          {!isCollapsed && (
+            <>
+              <div className="min-w-0 flex-1 text-left">
+                <b className="block truncate text-[13px] text-white">
+                  {user?.name ?? "Analyst"}
+                </b>
+                <small className="block truncate text-xs text-[#a9c7ae]">
+                  {user?.email ?? "Admin"}
+                </small>
+              </div>
+
+              <ChevronsUpDown size={15} className="shrink-0 text-[#a9c7ae]" />
+            </>
+          )}
         </button>
-      )}
+      </div>
     </aside>
   );
 }

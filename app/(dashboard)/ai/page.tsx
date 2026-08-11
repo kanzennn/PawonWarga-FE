@@ -12,12 +12,12 @@ export default function AISummaryPage() {
 
   return (
     <div className="min-w-0 pb-24 lg:pb-0">
-      <PageHeading title="AI Summary" subtitle="Ringkasan otomatis, temuan utama, isu prioritas, dan rekomendasi komunikasi publik." />
+      <PageHeading title="AI Summary" subtitle="Automated summary, key findings, priority issues, and public communication recommendations." />
 
       {isLoading ? (
-        <LoadingState message="Memuat ringkasan AI..." />
+        <LoadingState message="Loading AI summary..." />
       ) : !insight ? (
-        <ErrorState message={error ?? "Ringkasan AI tidak tersedia."} onRetry={refetch} />
+        <ErrorState message={error ?? "AI summary unavailable."} onRetry={refetch} />
       ) : (
         <AiSummaryContent insight={insight} />
       )}

@@ -41,7 +41,7 @@ export default function RegisterPage() {
       });
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Registrasi gagal, coba lagi.");
+      setError(err instanceof ApiError ? err.message : "Registration failed, please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -49,12 +49,12 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout
-      heading="Buat Akun Baru"
+      heading="Create New Account"
       subtitle={
         <>
-          Sudah punya akun?{" "}
+          Already have an account?{" "}
           <Link href="/login" className="font-black text-[#b9fb7d] hover:underline">
-            Masuk
+            Sign In
           </Link>
         </>
       }
@@ -62,18 +62,18 @@ export default function RegisterPage() {
       <form className="grid gap-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-2 gap-4">
           <AuthField
-            label="Nama Depan"
+            label="First Name"
             required
             value={form.firstName}
             onChange={(value) => updateField("firstName", value)}
-            placeholder="Nama depan"
+            placeholder="First name"
           />
           <AuthField
-            label="Nama Belakang"
+            label="Last Name"
             required
             value={form.lastName}
             onChange={(value) => updateField("lastName", value)}
-            placeholder="Nama belakang"
+            placeholder="Last name"
           />
         </div>
 
@@ -83,11 +83,11 @@ export default function RegisterPage() {
           required
           value={form.email}
           onChange={(value) => updateField("email", value)}
-          placeholder="nama@email.com"
+          placeholder="name@email.com"
         />
 
         <AuthField
-          label="Nomor HP"
+          label="Phone Number"
           type="tel"
           required
           minLength={8}
@@ -104,27 +104,32 @@ export default function RegisterPage() {
           minLength={8}
           value={form.password}
           onChange={(value) => updateField("password", value)}
-          placeholder="Minimal 8 karakter"
+          placeholder="Minimum 8 characters"
           rightSlot={
             <button
               type="button"
               onClick={() => setShowPassword((current) => !current)}
               className="text-white/40 hover:text-white/70"
-              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           }
         />
 
-        {error && <p className="m-0 text-sm font-bold text-[#ff8b8b] flex align-middle gap-2"><OctagonAlert size={18} />{error}</p>}
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-[#ff8b8b]/25 bg-[#ff8b8b]/10 px-4 py-3 text-sm font-bold text-[#ff8b8b]">
+            <OctagonAlert size={18} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
           className="mt-2 h-12 rounded-2xl bg-gradient-to-br from-[#dcffc5] to-[#c8f7a6] font-black text-[#052d22] transition disabled:opacity-60"
         >
-          {isSubmitting ? "Mendaftar..." : "Buat Akun"}
+          {isSubmitting ? "Signing up..." : "Create Account"}
         </button>
       </form>
     </AuthLayout>

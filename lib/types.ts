@@ -40,6 +40,12 @@ export interface Mention {
   text: string;
   sentiment: Sentiment;
   engagement: string;
+  /** "" (not "0") when the source platform's scraper never captured this counter. */
+  view: string;
+  /** "" (not "0") when the source platform's scraper never captured this counter. */
+  like: string;
+  /** "" (not "0") when the source platform's scraper never captured this counter. */
+  share: string;
   time: string;
   location: string;
   category: string;

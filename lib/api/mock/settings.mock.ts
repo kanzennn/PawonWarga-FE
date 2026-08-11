@@ -5,30 +5,19 @@ import type {
   UpdatePreferenceInput,
 } from "@/lib/api/types";
 
-// Mutable copies so a toggle sticks for the rest of the browser session,
-// the way a real PATCH would. Reloading the page resets them.
-let integrationState: SettingsIntegrationDto[] = settingsIntegrations.map((item) => ({ ...item }));
+// Preferences keep a mutable copy so a toggle sticks for the rest of the
+// browser session, the way a real PUT would. Reloading the page resets it.
+// Integrations have no such state — their status is read-only (reported
+// automatically), so buildIntegrations just re-maps the dummy data fresh
+// every call.
 let preferenceState: MonitoringPreferenceDto[] = monitoringPreferences.map((item) => ({ ...item }));
 
 export function buildIntegrations(): SettingsIntegrationDto[] {
-  return integrationState.map((item) => ({ ...item }));
+  return settingsIntegrations.map((item) => ({ ...item }));
 }
 
 export function buildPreferences(): MonitoringPreferenceDto[] {
   return preferenceState.map((item) => ({ ...item }));
-}
-
-export function toggleIntegrationStatus(name: string): SettingsIntegrationDto[] {
-  integrationState = integrationState.map((item) =>
-    item.name === name
-      ? {
-          ...item,
-          status: item.status === "Operational" ? "Not Operational" : "Operational",
-        }
-      : item,
-  );
-
-  return buildIntegrations();
 }
 
 export function applyPreference(input: UpdatePreferenceInput): MonitoringPreferenceDto[] {

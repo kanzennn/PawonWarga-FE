@@ -26,7 +26,7 @@ export default function LoginPage() {
       await login(form.email, form.password);
       router.replace("/dashboard");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Login gagal, coba lagi.");
+      setError(err instanceof ApiError ? err.message : "Login failed, please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -34,12 +34,12 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      heading="Masuk ke Akun Anda"
+      heading="Sign In to Your Account"
       subtitle={
         <>
-          Belum punya akun?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="font-black text-[#b9fb7d] hover:underline">
-            Daftar
+            Sign Up
           </Link>
         </>
       }
@@ -51,7 +51,7 @@ export default function LoginPage() {
           required
           value={form.email}
           onChange={(value) => setForm((current) => ({ ...current, email: value }))}
-          placeholder="nama@email.com"
+          placeholder="name@email.com"
         />
 
         <AuthField
@@ -60,27 +60,32 @@ export default function LoginPage() {
           required
           value={form.password}
           onChange={(value) => setForm((current) => ({ ...current, password: value }))}
-          placeholder="Masukkan password"
+          placeholder="Enter your password"
           rightSlot={
             <button
               type="button"
               onClick={() => setShowPassword((current) => !current)}
               className="text-white/40 hover:text-white/70"
-              aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           }
         />
 
-        {error && <p className="m-0 text-sm font-bold text-[#ff8b8b]"><OctagonAlert size={18} />{error}</p>}
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-2xl border border-[#ff8b8b]/25 bg-[#ff8b8b]/10 px-4 py-3 text-sm font-bold text-[#ff8b8b]">
+            <OctagonAlert size={18} className="mt-0.5 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
         <button
           type="submit"
           disabled={isSubmitting}
           className="mt-2 h-12 rounded-2xl bg-gradient-to-br from-[#dcffc5] to-[#c8f7a6] font-black text-[#052d22] transition disabled:opacity-60"
         >
-          {isSubmitting ? "Masuk..." : "Masuk"}
+          {isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
     </AuthLayout>

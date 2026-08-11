@@ -10,7 +10,7 @@ export interface ApiMutationState<TInput, TResult> {
   reset: () => void;
 }
 
-export const GENERIC_MUTATION_ERROR = "Gagal mengirim permintaan ke server.";
+export const GENERIC_MUTATION_ERROR = "Failed to send request to the server.";
 
 /**
  * Write counterpart to useApiQuery. `mutate` rethrows so the caller can branch

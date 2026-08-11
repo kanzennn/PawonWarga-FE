@@ -29,11 +29,11 @@ export default function AuthLayout({ heading, subtitle, children }: AuthLayoutPr
 
         <div className="relative z-10 max-w-md">
           <h1 className="m-0 text-[40px] font-black leading-[1.05] tracking-[-1px] text-white">
-            Dengarkan Suara Publik, <span className="text-[#b9fb7d]">Setiap Saat.</span>
+            Listen to the Public Voice, <span className="text-[#b9fb7d]">Every Moment.</span>
           </h1>
           <p className="mt-4 text-[15px] leading-relaxed text-white/70">
-            Pantau sentimen masyarakat terhadap program Makan Bergizi Gratis
-            secara real-time dari berbagai platform sosial.
+            Monitor public sentiment toward the Free Nutritious Meal (MBG)
+            program in real time across social platforms.
           </p>
         </div>
 

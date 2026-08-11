@@ -16,7 +16,7 @@ export default function Card({
   return (
     <section
       className={[
-        "min-w-0 rounded-[18px] border border-[#dce8df] bg-white/95 shadow-[0_12px_30px_rgba(11,68,45,0.06)]",
+        "min-w-0 rounded-[18px] border border-[#dce8df] bg-white/95 shadow-[0_12px_30px_rgba(11,68,45,0.06)] transition-shadow duration-300 hover:shadow-[0_16px_36px_rgba(11,68,45,0.1)]",
         className || "p-5",
       ].join(" ")}
     >

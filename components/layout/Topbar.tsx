@@ -205,7 +205,7 @@ export default function Topbar() {
       <button
         onClick={logout}
         title="Logout"
-        className="flex h-[46px] items-center gap-2.5 rounded-[14px] border border-[#dce8df] bg-white/90 px-2.5 text-[#10231c] shadow-[0_10px_30px_rgba(8,42,27,0.04)]"
+        className="flex h-[46px] items-center gap-2.5 rounded-[14px] border border-[#dce8df] bg-white/90 px-2.5 text-[#10231c] shadow-[0_10px_30px_rgba(8,42,27,0.04)] lg:hidden"
       >
         <div className="grid h-[38px] w-[38px] shrink-0 place-items-center overflow-hidden rounded-full bg-[#e4f8d6] text-xs font-black text-[#07513b]">
           {user?.profile_picture ? (

@@ -84,7 +84,7 @@ function AiSummaryContent({ insight }: { insight: AiInsight }) {
 
 function PageHeading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-7 max-w-xl lg:-mt-[78px]">
+    <div className="mb-7 max-w-xl">
       <h1 className="m-0 text-[28px] font-black tracking-[-0.7px] text-[#10231c]">{title}</h1>
       <p className="mt-1 text-[15px] text-[#6d7e75]">{subtitle}</p>
     </div>

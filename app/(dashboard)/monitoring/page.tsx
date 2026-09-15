@@ -377,7 +377,9 @@ function MonitoringContent({
                       ? "bg-[#fce7f3] text-[#be185d]"
                       : item.name === "TikTok"
                         ? "bg-[#111827] text-white"
-                        : item.name === "News"
+                        : item.name === "Threads"
+                          ? "bg-[#000000] text-white"
+                          : item.name === "News"
                           ? "bg-[#dbeafe] text-[#1d4ed8]"
                           : item.name === "YouTube"
                             ? "bg-[#fee2e2] text-[#dc2626]"
@@ -443,7 +445,7 @@ function MonitoringContent({
 
 function PageHeading({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="mb-7 max-w-xl lg:-mt-[78px]">
+    <div className="mb-7 max-w-xl">
       <h1 className="m-0 text-[28px] font-black tracking-[-0.7px] text-[#10231c]">
         {title}
       </h1>

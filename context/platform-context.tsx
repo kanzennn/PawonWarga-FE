@@ -5,7 +5,7 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from "re
 /** Display-name platform values, matching the backend's platformDisplayOrder
  * (internal/handler/mention.go) — these are exactly what the API expects for
  * the `platform` query param. */
-export const PLATFORM_OPTIONS = ["X", "Instagram", "TikTok", "News", "YouTube"] as const;
+export const PLATFORM_OPTIONS = ["X", "Instagram", "TikTok", "Threads", "News", "YouTube"] as const;
 
 interface PlatformContextValue {
   /** null means no filter applied ("All Platforms"). */

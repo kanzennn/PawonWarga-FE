@@ -18,6 +18,7 @@ export const platformMeta: Record<string, PlatformMeta> = {
   X: { label: "X", bg: "bg-[#061a16]", text: "text-white" },
   Instagram: { label: "IG", bg: "bg-[#fce7f3]", text: "text-[#be185d]" },
   TikTok: { label: "TT", bg: "bg-[#111827]", text: "text-white" },
+  Threads: { label: "TH", bg: "bg-[#000000]", text: "text-white" },
   News: { label: "N", bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]" },
   YouTube: { label: "YT", bg: "bg-[#fee2e2]", text: "text-[#dc2626]" },
 };

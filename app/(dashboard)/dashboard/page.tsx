@@ -40,6 +40,7 @@ const sourceMeta: Record<string, { bg: string; text: string }> = {
   X: { bg: "bg-[#061a16]", text: "text-white" },
   IG: { bg: "bg-[#fce7f3]", text: "text-[#be185d]" },
   TT: { bg: "bg-[#111827]", text: "text-white" },
+  TH: { bg: "bg-[#000000]", text: "text-white" },
   N: { bg: "bg-[#dbeafe]", text: "text-[#1d4ed8]" },
   YT: { bg: "bg-[#fee2e2]", text: "text-[#dc2626]" },
 };
@@ -55,7 +56,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-w-0 pb-16 lg:pb-0">
-      <div className="mb-5 max-w-xl lg:-mt-[72px] 2xl:-mt-[72px]">
+      <div className="mb-5 max-w-xl">
         <h1 className="m-0 text-[26px] font-black text-[#10231c]">
           Dashboard
         </h1>

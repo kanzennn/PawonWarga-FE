@@ -34,6 +34,7 @@ export const platformData: PlatformDatum[] = [
   { name: "X", value: 45200, positive: 62, negative: 22, neutral: 16, mentionCount: 3120 },
   { name: "Instagram", value: 32100, positive: 75, negative: 14, neutral: 11, mentionCount: 2480 },
   { name: "TikTok", value: 21400, positive: 69, negative: 20, neutral: 11, mentionCount: 1750 },
+  { name: "Threads", value: 9800, positive: 66, negative: 21, neutral: 13, mentionCount: 820 },
   { name: "News", value: 18700, positive: 54, negative: 24, neutral: 22, mentionCount: 940 },
   { name: "YouTube", value: 11000, positive: 71, negative: 17, neutral: 12, mentionCount: 610 },
 ];
@@ -141,6 +142,22 @@ export const mentions: Mention[] = [
     risk: "Medium",
     url: "",
   },
+  {
+    id: 7,
+    platform: "Threads",
+    user: "@warganet.peduli",
+    text: "Program MBG di daerah saya sudah berjalan rutin, anak-anak terlihat lebih semangat ke sekolah.",
+    sentiment: "positive",
+    engagement: "2.3K",
+    view: "6.8K",
+    like: "2.3K",
+    share: "410",
+    time: "16:08",
+    location: "Yogyakarta",
+    category: "Nutrition",
+    risk: "Low",
+    url: "",
+  },
 ];
 
 export const keywords: Keyword[] = [
@@ -185,6 +202,7 @@ export const settingsIntegrations: SettingsIntegration[] = [
   { name: "X / Twitter", status: "Operational", count: "45.2K mentions" },
   { name: "Instagram", status: "Operational", count: "32.1K mentions" },
   { name: "TikTok", status: "Operational", count: "21.4K mentions" },
+  { name: "Threads", status: "Operational", count: "9.8K mentions" },
   { name: "YouTube", status: "Operational", count: "11.0K mentions" },
   { name: "News API", status: "Operational", count: "18.7K articles" },
 ];
@@ -270,6 +288,7 @@ export const dashboardDataSources: DataSourceStatus[] = [
   { code: "X", label: "X / Twitter", value: "45.2K", active: true },
   { code: "IG", label: "Instagram", value: "32.1K", active: true },
   { code: "TT", label: "TikTok", value: "21.4K", active: true },
+  { code: "TH", label: "Threads", value: "9.8K", active: true },
 ];
 
 export const dashboardLastUpdated = "15 menit yang lalu";

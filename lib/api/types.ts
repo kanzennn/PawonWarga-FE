@@ -92,7 +92,7 @@ export interface DashboardQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
-  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+  /** X/Instagram/TikTok/Threads/News/YouTube from the topbar's platform picker —
    * omitted means "All Platforms". */
   platform?: string;
 }
@@ -213,7 +213,7 @@ export interface SentimentQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
-  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+  /** X/Instagram/TikTok/Threads/News/YouTube from the topbar's platform picker —
    * omitted means "All Platforms". */
   platform?: string;
 }
@@ -278,7 +278,7 @@ export interface KeywordQuery {
    * omitted means "view without a date range" (all-time). */
   from?: string;
   to?: string;
-  /** X/Instagram/TikTok/News/YouTube from the topbar's platform picker —
+  /** X/Instagram/TikTok/Threads/News/YouTube from the topbar's platform picker —
    * omitted means "All Platforms". */
   platform?: string;
 }
